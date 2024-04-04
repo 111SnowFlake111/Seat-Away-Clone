@@ -3,7 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 
+[System.Serializable]
 public class LevelControllerNew : SerializedMonoBehaviour
 {
-    public Transform[,] transforms = new Transform[4, 4];
+    public int mapRow;
+    public int mapColumn;
+    public GameObject[,] map;
+
+    private void Awake()
+    {
+     
+    }
+    [Button] 
+    public void SetMatrix()
+    {
+        map = new GameObject[mapRow, mapColumn];
+    }
 }
