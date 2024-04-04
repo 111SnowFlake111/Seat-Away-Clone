@@ -4,15 +4,7 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - TileCheckCollision
-  - Tile
-  - FxTemporaire
-  - Effects
-  - CUBE
-  - BOLT
-  - MASk
-  - Fill
-  - Broad
+  - Chair
   layers:
   - Default
   - TransparentFX
