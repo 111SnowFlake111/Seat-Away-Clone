@@ -149,6 +149,7 @@ public class InputController : MonoBehaviour
                     }
 
                     chair.GetComponent<Rigidbody>().velocity = Vector3.ClampMagnitude((newMousePos - chair.transform.position).normalized * 500f, 500f);
+
                 }
             }
         }

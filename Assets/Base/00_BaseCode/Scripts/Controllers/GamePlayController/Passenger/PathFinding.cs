@@ -235,16 +235,13 @@ public class PathFinding : SerializedMonoBehaviour
             {
                 currentLevel.passengers.Remove(gameObject.GetComponent<PathFinding>());
                 gameObject.GetComponent<WaitInLine>().waitTile.occupied = false;
-            }).OnComplete(delegate
-            {
-                gameObject.transform.parent = goal.transform;
 
                 foreach (PathFinding passenger in currentLevel.passengers)
                 {
                     passenger.GetComponent<WaitInLine>().MoveToNextTile();
                 }
 
-                for(int i = 0; i < currentLevel.passengers.Count; i++)
+                for (int i = 0; i < currentLevel.passengers.Count; i++)
                 {
                     if (currentLevel.passengers[i] != null)
                     {
@@ -254,10 +251,13 @@ public class PathFinding : SerializedMonoBehaviour
                             {
                                 currentLevel.passengers[i].GetComponent<PathFinding>().GetMap();
                                 break;
-                            }                           
+                            }
                         }
                     }
-                } 
+                }
+            }).OnComplete(delegate
+            {
+                gameObject.transform.parent = goal.transform;
             });
         }
         
