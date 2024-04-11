@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class InputController : MonoBehaviour
 {
+    public LevelControllerNew currentLevel;
+
     public GameObject chair;
     public GameObject floor;
     public GameObject floor2;
@@ -30,43 +32,49 @@ public class InputController : MonoBehaviour
             {
                 if (hit.collider.gameObject.GetComponent<Chair>() != null)
                 {
-                    if (Physics.Raycast(ogMousePos, Vector3.down, out floorHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
+                    if (hit.collider.gameObject.GetComponent<Chair>().moveAble)
                     {
-                        if (floorHit.collider.gameObject.GetComponent<MapTile>().chair != null)
+                        if (Physics.Raycast(ogMousePos, Vector3.down, out floorHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
                         {
-                            floorHit.collider.gameObject.GetComponent<MapTile>().chair = null;
+                            if (floorHit.collider.gameObject.GetComponent<MapTile>().chair != null)
+                            {
+                                floorHit.collider.gameObject.GetComponent<MapTile>().chair = null;
+                            }
                         }
-                    }
 
-                    chairOgPos = hit.collider.gameObject.transform.position;
-                    chair = hit.collider.gameObject;
+                        chairOgPos = hit.collider.gameObject.transform.position;
+                        chair = hit.collider.gameObject;
+                    }
                 }
 
                 if (hit.collider.gameObject.GetComponent<TwinChair>() != null)
                 {
-                    foreach(Chair chair in hit.collider.gameObject.GetComponent<TwinChair>().ChairList)
+                    if (hit.collider.gameObject.GetComponent<TwinChair>().moveAble)
                     {
-                        chair.GetComponent<BoxCollider>().enabled = false;
-                    }
-
-                    if (Physics.Raycast(hit.collider.gameObject.GetComponent<TwinChair>().ChairList[0].transform.position, Vector3.down, out floorHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
-                    {
-                        if (floorHit.collider.gameObject.GetComponent<MapTile>().chair != null)
+                        foreach (Chair chair in hit.collider.gameObject.GetComponent<TwinChair>().ChairList)
                         {
-                            floorHit.collider.gameObject.GetComponent<MapTile>().chair = null;
+                            chair.GetComponent<BoxCollider>().enabled = false;
                         }
-                    }
 
-                    if (Physics.Raycast(hit.collider.gameObject.GetComponent<TwinChair>().ChairList[1].transform.position, Vector3.down, out floorHit2, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
-                    {
-                        if (floorHit2.collider.gameObject.GetComponent<MapTile>().chair != null)
+                        if (Physics.Raycast(hit.collider.gameObject.GetComponent<TwinChair>().ChairList[0].transform.position, Vector3.down, out floorHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
                         {
-                            floorHit2.collider.gameObject.GetComponent<MapTile>().chair = null;
+                            if (floorHit.collider.gameObject.GetComponent<MapTile>().chair != null)
+                            {
+                                floorHit.collider.gameObject.GetComponent<MapTile>().chair = null;
+                            }
                         }
-                    }
 
-                    chairOgPos = hit.collider.gameObject.transform.position;
-                    chair = hit.collider.gameObject;
+                        if (Physics.Raycast(hit.collider.gameObject.GetComponent<TwinChair>().ChairList[1].transform.position, Vector3.down, out floorHit2, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
+                        {
+                            if (floorHit2.collider.gameObject.GetComponent<MapTile>().chair != null)
+                            {
+                                floorHit2.collider.gameObject.GetComponent<MapTile>().chair = null;
+                            }
+                        }
+
+                        chairOgPos = hit.collider.gameObject.transform.position;
+                        chair = hit.collider.gameObject;
+                    }
                 }
             }           
         }
@@ -185,6 +193,27 @@ public class InputController : MonoBehaviour
                         chair.transform.position = chairOgPos;
                         floorHit.collider.gameObject.GetComponent<MapTile>().chair = chair;
                     }                    
+                }
+
+                //foreach (PathFinding passenger in currentLevel.passengers)
+                //{
+                //    passenger.GetComponent<WaitInLine>().MoveToNextTile();
+                //}
+
+                for (int i = 0; i < currentLevel.passengers.Count; i++)
+                {
+                    if(currentLevel.passengers[i] != null)
+                    {
+                        if (currentLevel.passengers[i].GetComponent<PathFinding>().enabled)
+                        {
+                            if (currentLevel.passengers[i].GetComponent<PathFinding>().isAtEntrance)
+                            {
+                                currentLevel.passengers[i].GetComponent<PathFinding>().GetMap();
+                                break;
+                            }
+                        }
+                    }
+                    
                 }
 
                 chair.GetComponent<Rigidbody>().isKinematic = true;

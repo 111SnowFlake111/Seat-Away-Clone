@@ -5,6 +5,7 @@ using UnityEngine;
 public class TwinChair : MonoBehaviour
 {
     public List<Chair> ChairList;
+    public bool moveAble = true;
 
     // Start is called before the first frame update
     void Start()

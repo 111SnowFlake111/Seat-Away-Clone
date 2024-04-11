@@ -1,48 +1,43 @@
-using DG.Tweening;
+﻿using DG.Tweening;
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using Sirenix.OdinInspector;
 
-public class PathFinding : MonoBehaviour
+public class PathFinding : SerializedMonoBehaviour
 {
     public LevelControllerNew currentLevel;
     public GameObject[,] map;
     public GameObject goal;
 
-    public GameObject currentPos;
-
-    int xDistance;
-    int yDistance;
+    public List<Vector3> path;
+    public List<MapTile> finalPath = new List<MapTile>();
 
     int currentPos_row;
     int currentPos_col;
 
-    bool isAtEntrance = false;
+    public bool isAtEntrance = false;
 
-    List<Vector3> path;
-    GameObject left;
-    GameObject right;
-    GameObject up;
-    GameObject down;
+    Queue<MapTile> BFSQueueList = new Queue<MapTile>();
+    public Dictionary<MapTile, bool> visitStatus = new Dictionary<MapTile, bool>();
+    public List<MapTile> traceBackPath = new List<MapTile>();
 
-    // Start is called before the first frame update
+    public RaycastHit currentFloor;
+
+    bool isSeated = false;
+
     void Start()
     {
-        path = new List<Vector3>();
 
         map = currentLevel.map;
-        xDistance = Mathf.Abs(Mathf.RoundToInt(map[0, 0].transform.position.x - map[0, 1].transform.position.x));
-        yDistance = Mathf.Abs(Mathf.RoundToInt(map[0, 0].transform.position.z - map[1, 0].transform.position.z));
-
-        path.Add(Vector3.zero);
 
         currentPos_row = 0;
         currentPos_col = map.GetLength(0) - 1;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
@@ -51,20 +46,20 @@ public class PathFinding : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            FindWay();
+            GetMap();
+        }
+
+        if (isSeated)
+        {
+            transform.localPosition = Vector3.zero;
         }
     }
 
     void GoToEntrance()
     {
-        currentPos_row = 0;
-        currentPos_col = map.GetLength(0) - 1;
-        currentPos = map[currentPos_col, currentPos_row];
-        
-
-        if (transform.position != currentPos.transform.position)
+        if (transform.position != map[currentPos_col, currentPos_row].transform.position)
         {
-            transform.DOMove(currentPos.transform.position + new Vector3(0, 0.5f, 0), 1f);
+            transform.DOLocalMove(map[currentPos_col, currentPos_row].transform.localPosition + new Vector3(0, 0.5f, 0), 1f);
             isAtEntrance = true;
         }
         else
@@ -73,129 +68,198 @@ public class PathFinding : MonoBehaviour
         }
     }
 
+    
+    [Button]
+    public void GetMap()
+    {
+        currentLevel.UpdateMap();
+
+        visitStatus.Clear();
+        BFSQueueList.Clear();
+        traceBackPath.Clear();
+        path.Clear();
+        finalPath.Clear();
+
+        FindWay();
+    }
+
+    //Breadth First Search Algorithm
+
+    [Button]
     void FindWay()
     {
-        if (!isAtEntrance)
+        map = currentLevel.map;
+        foreach (GameObject tile in map)
+        {
+            if (tile != null)
+            {
+                if (tile.GetComponent<MapTile>() != null)
+                {
+                    visitStatus[tile.GetComponent<MapTile>()] = false;
+                }
+            }
+        }
+
+        if (!Physics.Raycast(transform.position, Vector3.down, out currentFloor, 1f, 1 << LayerMask.NameToLayer("Floor")))
+        {
+            Debug.LogError("Not on the floor");
+            return;
+        }
+        else if (Physics.Raycast(transform.position, Vector3.down, out currentFloor, 1f, 1 << LayerMask.NameToLayer("Floor")))
+        {
+            if (currentFloor.collider.GetComponent<MapTile>() != null)
+            {
+                BFSQueueList.Enqueue(currentFloor.collider.GetComponent<MapTile>());
+                traceBackPath.Add(currentFloor.collider.GetComponent<MapTile>());
+
+                visitStatus[currentFloor.collider.GetComponent<MapTile>()] = true;
+            }
+            else
+            {
+                Debug.LogError("Not on the floor");
+                return;
+            }
+        }      
+
+        //visitStatus[map[currentPos_col, currentPos_row].GetComponent<MapTile>()] = true;
+
+        while(BFSQueueList.Count > 0)
+        {
+            MapTile tileMap = BFSQueueList.Dequeue();
+            List<MapTile> tileMapNeighbours = tileMap.neighbourTiles;
+
+            foreach(MapTile tile in tileMapNeighbours)
+            {
+                if (visitStatus[tile] == false)
+                {
+                    BFSQueueList.Enqueue(tile);
+                    visitStatus[tile] = true;
+
+                    if(tile.chair != null)
+                    {
+                        if(tile.chair == goal)
+                        {
+                            traceBackPath.Add(tile);
+                        }                       
+                    }
+                    else
+                    {
+                        traceBackPath.Add(tile);
+                    }
+                }
+            }
+        }
+
+        ContructWay();
+    }
+
+    [Button]
+    void ContructWay()
+    {
+        RaycastHit floor;
+        Physics.Raycast(goal.transform.position, Vector3.down, out floor, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor"));
+
+        if(floor.collider.GetComponent<MapTile>() == currentFloor.collider.GetComponent<MapTile>())
         {
             return;
         }
 
-        int currentX = currentPos_col;
-        int currentY = currentPos_row;
-
-        int left_costStartToGoal;
-        int left_costStartToPos;
-        int left_totalCost = 0;
-
-        int right_costStartToGoal;
-        int right_costStartToPos;
-        int right_totalCost = 0;
-
-        int up_costStartToGoal;
-        int up_costStartToPos;
-        int up_totalCost = 0;
-
-        int down_costStartToGoal;
-        int down_costStartToPos;
-        int down_totalCost = 0;
-
-        int sameCost = 0;
-
-        while (path[path.Count - 1] != goal.transform.position)
+        if (floor.collider.GetComponent<MapTile>() != null)
         {
-            //up
-            if(currentY - 1 < 0)
+            if (currentFloor.collider.GetComponent<MapTile>().neighbourTiles.Contains(floor.collider.GetComponent<MapTile>()))
             {
-                up_totalCost = 99;
-            }
-            else if (map[currentX, currentY - 1] != null)
-            {
-                up = map[currentX, currentY - 1];
-                up_costStartToPos = 
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - up.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - up.transform.position.z) / yDistance));
-                up_costStartToGoal =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - goal.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - goal.transform.position.z) / yDistance));
-                up_totalCost = up_costStartToGoal + up_costStartToPos;
+                if (floor.collider.GetComponent<MapTile>().rightTile == currentFloor.collider.GetComponent<MapTile>() || floor.collider.GetComponent<MapTile>().leftTile == currentFloor.collider.GetComponent<MapTile>() || floor.collider.GetComponent<MapTile>().frontTile == currentFloor.collider.GetComponent<MapTile>())
+                {
+                    transform.DOLocalMove(floor.collider.transform.localPosition + new Vector3(0, 0.5f, 0), 2f).SetEase(Ease.Linear).WaitForCompletion();
+                    return;
+                }
+                else
+                {
+                    Debug.LogError("Path not found for " + gameObject.name);
+                    return;
+                }
             }
 
-            //down
-            if (currentY + 1 >= map.GetLength(1))
+            for (int i = traceBackPath.IndexOf(floor.collider.gameObject.GetComponent<MapTile>()); i >= 0; i--)
             {
-                down_totalCost = 99;
-            }
-            else if (map[currentX, currentY + 1] != null)
-            {
-                down = map[currentX, currentY + 1];
-                down_costStartToPos =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - down.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - down.transform.position.z) / yDistance));
-                down_costStartToGoal =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - goal.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - goal.transform.position.z) / yDistance));
-                down_totalCost = down_costStartToGoal + down_costStartToPos;
-            }
-
-            //left
-            if (currentX - 1 < 0)
-            {
-                left_totalCost = 99;
-            }
-            else if (map[currentX - 1, currentY] != null)
-            {
-                left = map[currentX - 1, currentY];
-                left_costStartToPos =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - left.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - left.transform.position.z) / yDistance));
-                left_costStartToGoal =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - goal.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - goal.transform.position.z) / yDistance));
-                left_totalCost = left_costStartToGoal + left_costStartToPos;
+                if(finalPath.Count <= 0)
+                {
+                    finalPath.Add(traceBackPath[i]);
+                }
+                else
+                {
+                    //Loại bỏ phần này nếu agent được phép đi chéo
+                    if (finalPath[finalPath.Count - 1].neighbourTiles.Contains(traceBackPath[i]))
+                    {
+                        finalPath.Add(traceBackPath[i]);
+                        
+                        if (traceBackPath[i].neighbourTiles.Contains(currentFloor.collider.gameObject.GetComponent<MapTile>()))
+                        {
+                            finalPath.Add(currentFloor.collider.gameObject.GetComponent<MapTile>());
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }             
             }
 
-            //right
-            if (currentX + 1 >= map.GetLength(0))
-            {
-                right_totalCost = 99;
-            }
-            else if (map[currentX + 1, currentY] != null)
-            {
-                right = map[currentX + 1, currentY];
-                right_costStartToPos =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - right.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - right.transform.position.z) / yDistance));
-                right_costStartToGoal =
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.x - goal.transform.position.x) / xDistance)) +
-                    Mathf.Abs(Mathf.RoundToInt((map[currentX, currentY].transform.position.z - goal.transform.position.z) / yDistance));
-                right_totalCost = right_costStartToGoal + right_costStartToPos;
-            }
-
-            int[] stepCosts = new int[]{up_totalCost, down_totalCost, left_totalCost, right_totalCost};
-            int stepTaken = stepCosts.Min();
-
-            if (stepTaken == down_totalCost)
-            {
-                path.Add(down.transform.position);
-                currentY++; 
-            }
-            else if (stepTaken == left_totalCost)
-            {
-                path.Add(left.transform.position);
-                currentX--;
-            }
-            else if(stepTaken == right_totalCost)
-            {
-                path.Add(right.transform.position);
-                currentX++;
-            }
-            else if (stepTaken == up_totalCost)
-            {
-                path.Add(up.transform.position);
-                currentY--;
-            }
+            finalPath.Reverse();
+        }
+        else
+        {
+            Debug.LogError("Not a valid goal");
+            return;
         }
 
-        gameObject.transform.DOPath(path.ToArray(), 3f, pathType: PathType.Linear);
+        if (finalPath[0].transform.localPosition == currentFloor.collider.transform.localPosition)
+        {
+            
+
+            foreach (MapTile mapTile in finalPath)
+            {
+                path.Add(mapTile.transform.localPosition + new Vector3(0, 0.5f, 0));
+            }
+        }
+        else
+        {
+            Debug.LogError("Path not found for " + gameObject.name);
+            return;
+        }
+
+        if(path.Count > 1)
+        {
+            transform.DOLocalPath(path.ToArray(), 2f).SetEase(Ease.Linear).OnStart(delegate
+            {
+                currentLevel.passengers.Remove(gameObject.GetComponent<PathFinding>());
+                gameObject.GetComponent<WaitInLine>().waitTile.occupied = false;
+            }).OnComplete(delegate
+            {
+                gameObject.transform.parent = goal.transform;
+
+                foreach (PathFinding passenger in currentLevel.passengers)
+                {
+                    passenger.GetComponent<WaitInLine>().MoveToNextTile();
+                }
+
+                for(int i = 0; i < currentLevel.passengers.Count; i++)
+                {
+                    if (currentLevel.passengers[i] != null)
+                    {
+                        if (currentLevel.passengers[i].GetComponent<PathFinding>().enabled)
+                        {
+                            if (currentLevel.passengers[i].GetComponent<PathFinding>().isAtEntrance)
+                            {
+                                currentLevel.passengers[i].GetComponent<PathFinding>().GetMap();
+                                break;
+                            }                           
+                        }
+                    }
+                } 
+            });
+        }
+        
     }
 }
