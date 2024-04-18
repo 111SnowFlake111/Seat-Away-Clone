@@ -19,7 +19,7 @@ public class WaitTile : MonoBehaviour
         RaycastHit hit;
         if(Physics.Raycast(transform.position, Vector3.up, out hit, 1f))
         {
-            if(hit.collider.GetComponent<PathFinding>() != null)
+            if(hit.collider.GetComponent<PathFindingAStar>() != null)
             {
                 occupied = true;
             }
@@ -27,7 +27,7 @@ public class WaitTile : MonoBehaviour
     }
 
     [Button]
-    private void FindFrontTile()
+    public void FindFrontTile()
     {
         RaycastHit hit;
 
@@ -41,7 +41,7 @@ public class WaitTile : MonoBehaviour
     }
 
     [Button]
-    void FindEntrance()
+    public void FindEntrance()
     {
         RaycastHit hit;
 

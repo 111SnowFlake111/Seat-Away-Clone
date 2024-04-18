@@ -15,4 +15,6 @@
     ScrollEndChange = 100,
     CHANGE_COIN = 101,
 
+    LEVELCHANGE = 102,
+
 }

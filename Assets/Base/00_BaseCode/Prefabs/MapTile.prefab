@@ -150,4 +150,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c23f42315227694685e92dad0daf2fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chairSpawn: {fileID: 3566345496418685, guid: 1a09d8212bbbd1a4795cf49ecd97b5f9, type: 3}
+  twinChairSpawn: {fileID: 2234533126862486933, guid: 8d83ab25c2e323d4da2dd92013100499, type: 3}
   chair: {fileID: 0}
+  neighbourTiles: []
+  leftTile: {fileID: 0}
+  rightTile: {fileID: 0}
+  frontTile: {fileID: 0}
+  autoTriggerPathFinder: 0

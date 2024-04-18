@@ -14,9 +14,9 @@ public enum StateGame
     Pause = 4
 }
 
-public class GamePlayController1 : Singleton<GamePlayController1>
+public class GamePlayController : Singleton<GamePlayController>
 {
-    public PlayerContain1 playerContain;
+    public PlayerContain playerContain;
     public GameScene gameScene;
 
  

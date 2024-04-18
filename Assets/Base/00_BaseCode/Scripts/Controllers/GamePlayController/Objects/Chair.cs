@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,16 +6,21 @@ using UnityEngine;
 public class Chair : MonoBehaviour
 {
     public bool moveAble = true;
+    public bool occupied = false;
 
-    // Start is called before the first frame update
-    void Start()
+    [HideInInspector]
+    public int colorID
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        get
+        {
+            if(transform.parent.GetComponent<TwinChair>() != null)
+            {
+                return transform.parent.GetComponent<ChairColor>().selectedColor;
+            }
+            else
+            {
+                return GetComponent<ChairColor>().selectedColor;
+            }
+        }
     }
 }

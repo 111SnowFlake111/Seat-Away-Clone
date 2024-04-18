@@ -23,12 +23,13 @@ public class UseProfile : MonoBehaviour
     {
         get
         {
-            return PlayerPrefs.GetInt(StringHelper.CURRENT_LEVEL, 1);
+            return PlayerPrefs.GetInt(StringHelper.CURRENT_LEVEL);
         }
         set
         {
             PlayerPrefs.SetInt(StringHelper.CURRENT_LEVEL, value);
             PlayerPrefs.Save();
+            EventDispatcher.EventDispatcher.Instance.PostEvent(EventID.LEVELCHANGE);
         }
     }
     public static int EggRanking
