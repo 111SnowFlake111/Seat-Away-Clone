@@ -34,7 +34,7 @@ public class PassengerColor : MonoBehaviour
 
     void ChangeMaterial()
     {
-        gameObject.GetComponent<Renderer>().material = currentLevel.avaiableColors[selectedColor];
+        //gameObject.GetComponent<Renderer>().material = currentLevel.avaiableColors[selectedColor];
         foreach (GameObject seatParts in bodyPartsNeedColorChange)
         {
             seatParts.GetComponent<Renderer>().material = currentLevel.avaiableColors[selectedColor];

@@ -28,6 +28,7 @@ public class MapTile : MonoBehaviour
     public bool autoTriggerPathFinder = false;
 
     [NonSerialized] public GameObject chairInstance;
+    public int colorID;
     
     void Start()
     {

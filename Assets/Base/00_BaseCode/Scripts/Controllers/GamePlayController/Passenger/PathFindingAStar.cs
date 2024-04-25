@@ -12,26 +12,21 @@ using UnityEngine;
 public class PathFindingAStar : SerializedMonoBehaviour
 {
     public LevelControllerNew currentLevel;
-    public float GCost;
-    public float HCost;
 
-    public Queue<MapTile> queuedTiles = new Queue<MapTile>();
     public List<MapTile> checkedTiles = new List<MapTile>();
     public List<MapTile> openTiles = new List<MapTile>();
-
-    public Dictionary<MapTile, int> tileGCost = new Dictionary<MapTile, int>();
-    public Dictionary<MapTile, int> tileHCost = new Dictionary<MapTile, int>();
-    public Dictionary<MapTile, int> tileFCost = new Dictionary<MapTile, int>();
 
     public List<MapTile> truePath = new List<MapTile>();
 
     public Chair goal;
 
+    public MapTile currentMapTile;
+
     public bool isAtEntrance = false;
     RaycastHit currentFloor;
-    RaycastHit goalTileHit;
+    [NonSerialized] public RaycastHit goalTileHit;
 
-    [NonSerialized]public bool isSeated = false;
+    [NonSerialized] public bool isSeated = false;
 
     void Update()
     {
@@ -44,6 +39,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
     public void FindPath()
     {
         Physics.Raycast(transform.position, Vector3.down, out currentFloor, 1f, 1 << LayerMask.NameToLayer("Floor"));
+        currentMapTile = currentFloor.collider.GetComponent<MapTile>();
         Debug.LogError("current floor position recorded");
 
         for (int i = 0; i < currentLevel.avaiableChairs.Count; i++)
@@ -87,13 +83,9 @@ public class PathFindingAStar : SerializedMonoBehaviour
 
             if (!currentLevel.avaiableChairs[i].occupied)
             {
-                currentLevel.UpdateMap();
+                //currentLevel.UpdateMap();
                 checkedTiles.Clear();
                 openTiles.Clear();
-
-                tileGCost.Clear();
-                tileHCost.Clear();
-                tileFCost.Clear();
 
                 
 
@@ -540,22 +532,24 @@ public class PathFindingAStar : SerializedMonoBehaviour
                 }).SetEase(Ease.Linear)
                     .OnStart(delegate
                     {
+                        GetComponent<Animator>().SetBool("Walk", true);
+
                         if (transform.localPosition.x > goalTileHit.collider.GetComponent<MapTile>().transform.localPosition.x)
                         {
-                            GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(new Vector3(0, -90, 0), .1f);
+                            transform.DORotate(new Vector3(0, -90, 0), .1f);
                         }
                         else if (transform.localPosition.x < goalTileHit.collider.GetComponent<MapTile>().transform.localPosition.x)
                         {
-                            GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(new Vector3(0, 90, 0), .1f);
+                            transform.DORotate(new Vector3(0, 90, 0), .1f);
                         }
 
-                        if (transform.localPosition.z < goalTileHit.collider.GetComponent<MapTile>().transform.localPosition.z)
+                        else if (transform.localPosition.z < goalTileHit.collider.GetComponent<MapTile>().transform.localPosition.z)
                         {
-                            GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(Vector3.zero, .1f);
+                            transform.DORotate(Vector3.zero, .1f);
                         }
                         else if (transform.localPosition.z > goalTileHit.collider.GetComponent<MapTile>().transform.localPosition.z)
                         {
-                            GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(new Vector3(0, 180, 0), .1f);
+                            transform.DORotate(new Vector3(0, 180, 0), .1f);
                         }
 
                         currentLevel.avaiableChairs.Remove(goal);
@@ -594,7 +588,8 @@ public class PathFindingAStar : SerializedMonoBehaviour
                     })
                     .OnComplete(delegate
                     {
-                        GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(Vector3.zero, .1f);
+                        transform.DORotate(Vector3.zero, .1f);
+                        GetComponent<Animator>().SetBool("Sit", true);
 
                         if (goal.transform.parent.GetComponent<TwinChair>() != null)
                         {
@@ -609,9 +604,11 @@ public class PathFindingAStar : SerializedMonoBehaviour
 
                         currentLevel.passengerMoving = false;
 
+                        currentLevel.CheckWinCondition();
+
                         gameObject.GetComponent<WaitInLine>().enabled = false;
                         gameObject.GetComponent<PathFindingAStar>().enabled = false;
-                    }).WaitForCompletion(); ;
+                    }).WaitForCompletion();
                 break;
             case 1:
                 List<Vector3> path = new List<Vector3>();
@@ -627,20 +624,20 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         {
                             if (path[index].x > path[index + 1].x)
                             {
-                                GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(new Vector3(0, -90, 0), .1f);
+                                transform.DORotate(new Vector3(0, -90, 0), .1f);
                             }
                             else if (path[index].x < path[index + 1].x)
                             {
-                                GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(new Vector3(0, 90, 0), .1f);
+                                transform.DORotate(new Vector3(0, 90, 0), .1f);
                             }
 
-                            if (path[index].z < path[index + 1].z)
+                            else if (path[index].z < path[index + 1].z)
                             {
-                                GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(Vector3.zero, .1f);
+                                transform.DORotate(Vector3.zero, .1f);
                             }
                             else if (path[index].z > path[index + 1].z)
                             {
-                                GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(new Vector3(0, 180, 0), .1f);
+                                transform.DORotate(new Vector3(0, 180, 0), .1f);
                             }
                         }
                     })
@@ -650,6 +647,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         currentLevel.passengers.Remove(gameObject.GetComponent<PathFindingAStar>());
                         gameObject.GetComponent<WaitInLine>().waitTile.occupied = false;
 
+                        GetComponent<Animator>().SetBool("Walk", true);
 
                         goal.occupied = true;
                         if (goal.transform.parent.GetComponent<TwinChair>() != null)
@@ -682,7 +680,9 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         }
                     }).OnComplete(delegate
                     {
-                        GetComponent<PassengerColor>().bodyPartsNeedColorChange[0].transform.DORotate(Vector3.zero, .1f);
+                        transform.DORotate(Vector3.zero, .1f);
+
+                        GetComponent<Animator>().SetBool("Sit", true);
 
                         if (goal.transform.parent.GetComponent<TwinChair>() != null)
                         {
@@ -696,6 +696,8 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         gameObject.transform.localPosition = new Vector3(0, 0, 0);
 
                         currentLevel.passengerMoving = false;
+
+                        currentLevel.CheckWinCondition();
 
                         gameObject.GetComponent<WaitInLine>().enabled = false;
                         gameObject.GetComponent<PathFindingAStar>().enabled = false;

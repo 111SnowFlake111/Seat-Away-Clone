@@ -1,12 +1,15 @@
 using DG.Tweening;
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameScene : BaseScene
 {
-    public Text timer;
+    public Camera cam;
+
+    public TMP_Text timer;
 
     public Button btnSetting;
 
@@ -20,6 +23,12 @@ public class GameScene : BaseScene
     public GameLevelController gameLevelController;
 
     [NonSerialized] public bool firstChairMoved = false;
+
+    bool instantMoveActivated = false;
+    RaycastHit hit;
+    Coroutine temp;
+    Chair chosenChair = null;
+    PathFindingAStar passenger = null;
     public void Init()
     {
         timerFreezeEffect.fillAmount = 0;
@@ -30,18 +39,32 @@ public class GameScene : BaseScene
         btnAddColumn.onClick.AddListener(delegate { AddColumn(); });
     }
 
-    private void InitState()
+    public void InitState()
     {
         int minute = gameLevelController.level.GetComponent<LevelControllerNew>().timeLimit / 60;
         int second = gameLevelController.level.GetComponent<LevelControllerNew>().timeLimit % 60;
 
         timer.text = string.Format("{0: 00}: {1: 00}", minute, second);
+
+        if (gameLevelController.level.GetComponent<LevelControllerNew>().addColumnUsageLimit > 0)
+        {
+            btnAddColumn.interactable = true;
+        }
+        else
+        {
+            btnAddColumn.interactable = false;
+        }
     }
 
     IEnumerator TimerCountDown()
     {
         while(gameLevelController.level.GetComponent<LevelControllerNew>().timeLimit > 0)
         {
+            if(GamePlayController.Instance.playerContain.win || GamePlayController.Instance.playerContain.lose)
+            {
+                break;
+            }
+
             yield return new WaitForSeconds(1);
             gameLevelController.level.GetComponent<LevelControllerNew>().timeLimit -= 1;
             InitState();
@@ -49,42 +72,140 @@ public class GameScene : BaseScene
 
         if (gameLevelController.level.GetComponent<LevelControllerNew>().timeLimit <= 0)
         {
-            
+            gameLevelController.level.GetComponent<LevelControllerNew>().CheckWinCondition();
+        }
+    }
+
+    private void Update()
+    {
+        if (instantMoveActivated)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (Physics.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector3.down, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor")))
+                {
+                    if(hit.collider.GetComponent<MapTile>().chair != null)
+                    {
+                        chosenChair = hit.collider.GetComponent<MapTile>().chair.GetComponent<Chair>();
+                    }
+                    else
+                    {
+                        Debug.LogError("Not a valid chair");
+                        StartCoroutine(WaitForSecondsInstantMove(3));
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Not a valid chair");
+                    StartCoroutine(WaitForSecondsInstantMove(3));
+                }
+            }
+        }
+
+        if (chosenChair != null)
+        {
+            if (!chosenChair.occupied)
+            {
+                if (passenger.GetComponent<Passenger>().colorID == 1)
+                {
+                    if (chosenChair.colorID == 0 || chosenChair.colorID == 1)
+                    {
+                        passenger.goal = chosenChair;
+                        passenger.goalTileHit = hit;
+                        StartCoroutine(passenger.MoveToChair(0));
+
+                        StartCoroutine(WaitForSecondsInstantMove(3));
+
+                        chosenChair = null;
+                        passenger = null;
+                    }
+                    else
+                    {
+                        Debug.LogError("Chair color doesn't match passenger's color");
+                        StartCoroutine(WaitForSecondsInstantMove(3));
+
+                        chosenChair = null;
+                        passenger = null;
+                    }
+                }
+                else if (chosenChair.colorID == passenger.GetComponent<Passenger>().colorID)
+                {
+                    passenger.goal = chosenChair;
+                    passenger.goalTileHit = hit;
+                    StartCoroutine(passenger.MoveToChair(0));
+
+                    StartCoroutine(WaitForSecondsInstantMove(3));
+
+                    chosenChair = null;
+                    passenger = null;
+                }
+                else
+                {
+                    Debug.LogError("Chair color doesn't match passenger's color");
+                    StartCoroutine(WaitForSecondsInstantMove(3));                   
+
+                    chosenChair = null;
+                    passenger = null;
+                }
+            }
+            else
+            {
+                Debug.LogError("This chair is occupied");
+                StartCoroutine(WaitForSecondsInstantMove(3));
+
+                chosenChair = null;
+                passenger = null;
+            }
+
+            GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(true);
         }
     }
 
     public void StartTimer()
     {
-
+        temp = StartCoroutine(TimerCountDown());
     }
 
     public void StopTimer()
     {
-        
+        StopCoroutine(temp);
     }
 
     #region ButtonFunctions
     void FreezeTimer()
     {
         timerFreezeEffect.fillAmount = 1;
-        timerFreezeEffect.DOFillAmount(0, 7f)
+        timerFreezeEffect.DOFillAmount(0, 7f).SetEase(Ease.Linear)
             .OnStart(delegate
             {
                 btnFreezeTimer.interactable = false;
+                StopTimer();
 
             })
             .OnComplete(delegate
             {
                 btnFreezeTimer.interactable = true;
+                StartTimer();
             });
     }
 
     void InstantMove()
     {
+        if (gameLevelController.level.GetComponent<LevelControllerNew>().passengerMoving)
+        {
+            GameController.Instance.moneyEffectController.SpawnEffectText_FlyUp
+                (
+                    btnInstantMove.transform.position + new Vector3(0, 30, 0),
+                    "Please wait till all passengers have stopped moving",
+                    Color.red
+                );
+            return;
+        }
+
         btnInstantMove.interactable = false;
 
-        Chair chosenChair = null;
-        PathFindingAStar passenger = null;
+        
+        
 
         for (int i = 0; i < gameLevelController.level.GetComponent<LevelControllerNew>().passengers.Count; i++)
         {
@@ -101,86 +222,29 @@ public class GameScene : BaseScene
         if (passenger == null)
         {
             Debug.LogError("No valid Passenger at the entrance");
-            StartCoroutine(WaitForThreeSeconds());
-            btnInstantMove.interactable = true;
-            instantMoveTutorial.SetActive(false);
+            StartCoroutine(WaitForSecondsInstantMove(3));
+
             return;
         }
 
-        RaycastHit hit;
         instantMoveTutorial.SetActive(true);
-        while(chosenChair == null)
-        {
-            var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (Physics.Raycast(mousePos, Vector3.down, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Chair")))
-                {
-                    chosenChair = hit.collider.GetComponent<Chair>();
-                    break;
-                }
-                else
-                {
-                    Debug.LogError("Not a valid chair");
-                    StartCoroutine(WaitForThreeSeconds());
-                    btnInstantMove.interactable = true;
-                    instantMoveTutorial.SetActive(false);
-                    return;
-                }
-            }
-        }
+        instantMoveActivated = true;
 
-        if (!chosenChair.occupied)
-        {
-            if (passenger.GetComponent<Passenger>().colorID == 1)
-            {
-                if (chosenChair.colorID == 0 || chosenChair.colorID == 1)
-                {
-                    passenger.goal = chosenChair;
-                    passenger.MoveToChair(0);
-                }
-                else
-                {
-                    Debug.LogError("Chair color doesn't match passenger's color");
-                    StartCoroutine(WaitForThreeSeconds());
-                    btnInstantMove.interactable = true;
-                    instantMoveTutorial.SetActive(false);
-                    return;
-                }
-            }
-            else if (chosenChair.colorID == passenger.GetComponent<Passenger>().colorID)
-            {
-                passenger.goal = chosenChair;
-                passenger.MoveToChair(0);
-            }
-            else
-            {
-                Debug.LogError("Chair color doesn't match passenger's color");
-                StartCoroutine(WaitForThreeSeconds());
-                btnInstantMove.interactable = true;
-                instantMoveTutorial.SetActive(false);
-                return;
-            }
-        }
-        else
-        {
-            Debug.LogError("This chair is occupied");
-            StartCoroutine(WaitForThreeSeconds());
-            btnInstantMove.interactable = true;
-            instantMoveTutorial.SetActive(false);
-            return;
-        }
+        GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(false);
     }
 
     void AddColumn()
-    {
+    {        
         gameLevelController.level.GetComponent<LevelControllerNew>().AddOneColumnToTheLeft();
     }
     #endregion
 
-    IEnumerator WaitForThreeSeconds()
+
+    IEnumerator WaitForSecondsInstantMove(float second)
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(second);
+        btnInstantMove.interactable = true;
+        instantMoveTutorial.SetActive(false);
     }
 
     public override void OnEscapeWhenStackBoxEmpty()

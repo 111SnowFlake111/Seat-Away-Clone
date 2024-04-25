@@ -21,6 +21,10 @@ public class InputController : MonoBehaviour
     RaycastHit floorHit;
     RaycastHit floorHit2;
 
+    public void GetCurrentLevel()
+    {
+        currentLevel = GamePlayController.Instance.gameScene.gameLevelController.level.GetComponent<LevelControllerNew>();
+    }
 
     void Update()
     {
@@ -50,10 +54,10 @@ public class InputController : MonoBehaviour
                     {
                         if (hit.collider.gameObject.GetComponent<TwinChair>().moveAble)
                         {
-                            //foreach (Chair chair in hit.collider.gameObject.GetComponent<TwinChair>().ChairList)
-                            //{
-                            //    chair.GetComponent<BoxCollider>().enabled = false;
-                            //}
+                            foreach (Chair chair in hit.collider.gameObject.GetComponent<TwinChair>().ChairList)
+                            {
+                                chair.GetComponent<BoxCollider>().enabled = false;
+                            }
 
                             Physics.Raycast(hit.collider.gameObject.GetComponent<TwinChair>().ChairList[0].transform.position, Vector3.down, out floorHit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Floor"));
 
@@ -183,6 +187,10 @@ public class InputController : MonoBehaviour
                         floor.GetComponent<MapTile>().chair = chair.GetComponent<TwinChair>().ChairList[0].gameObject;
                         floor2.GetComponent<MapTile>().chair = chair.GetComponent<TwinChair>().ChairList[1].gameObject;
 
+                        if (!GamePlayController.Instance.playerContain.gameStart)
+                        {
+                            GamePlayController.Instance.playerContain.StartGame();
+                        }
                         //GamePlayController.Instance.gameScene.
                     }
                     else
@@ -192,10 +200,10 @@ public class InputController : MonoBehaviour
                         //floorHit2.collider.gameObject.GetComponent<MapTile>().chair = chair.GetComponent<TwinChair>().ChairList[1].gameObject;
                     }
 
-                    //foreach (Chair chair in chair.GetComponent<TwinChair>().ChairList)
-                    //{
-                    //    chair.GetComponent<BoxCollider>().enabled = true;
-                    //}
+                    foreach (Chair chair in chair.GetComponent<TwinChair>().ChairList)
+                    {
+                        chair.GetComponent<BoxCollider>().enabled = true;
+                    }
                 }
                 else if (chair.GetComponent<Chair>() != null)
                 {
@@ -205,6 +213,11 @@ public class InputController : MonoBehaviour
                         chair.transform.localPosition = new Vector3(0, 0.5f, 0);
                         floorHit.collider.gameObject.GetComponent<MapTile>().chair = null;
                         floor.GetComponent<MapTile>().chair = chair;
+
+                        if (!GamePlayController.Instance.playerContain.gameStart)
+                        {
+                            GamePlayController.Instance.playerContain.StartGame();
+                        }
                     }
                     else
                     {                       

@@ -65,6 +65,8 @@ public static class StringHelper
 
 public class PathPrefabs
 {
+    public const string END_GAME_BOX = "UI/Popups/EndGamePopUp";
+
     public const string POPUP_REWARD_BASE = "UI/Popups/PopupRewardBase";
     public const string CONFIRM_POPUP = "UI/Popups/ConfirmBox";
     public const string WAITING_BOX = "UI/Popups/WaitingBox";

@@ -516,18 +516,11 @@ public class ConfigBuild
     [MenuItem("Open Scene/Creat Level")]
     public static void OpenSceneCreatLevel()
     {
-        string localPath = "Assets/01_ArtPuzzle/Scenes/CreatLevel.unity";
+        string localPath = "Assets/Scenes/LevelCreator.unity";
         EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
         EditorSceneManager.OpenScene(localPath);
     }
 
-    [MenuItem("Open Scene/TestLevel")]
-    public static void OpenSceneTestLevel()
-    {
-        string localPath = "Assets/01_ArtPuzzle/Scenes/TestLevel.unity";
-        EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-        EditorSceneManager.OpenScene(localPath);
-    }
     [MenuItem("Open Scene/Delete Data")]
     public static void DeleteData()
     {

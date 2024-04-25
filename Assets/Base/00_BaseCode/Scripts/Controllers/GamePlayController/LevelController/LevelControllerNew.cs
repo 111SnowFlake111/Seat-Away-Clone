@@ -1,13 +1,15 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using System;
+using DG.Tweening;
 
 [System.Serializable]
 public class LevelControllerNew : SerializedMonoBehaviour
 {
     [Header("----------MAP CONFIG-----------")]
+    public int moneyReward;
     public int mapRow;
     public int mapColumn;
     public GameObject[,] map;
@@ -32,38 +34,87 @@ public class LevelControllerNew : SerializedMonoBehaviour
     public Material floorColor_1;
     public Material floorColor_2;
 
+    [NonSerialized] public int addColumnUsageLimit = 1;
+
     public void AddOneColumnToTheLeft()
     {
+        Vector3[] pathForAnim;
         mapColumn++;
-        Vector3 positionOverwrite = new Vector3(2 - mapColumn - 1, 0, 2);
-        for(int i = 0; i < mapColumn; i++)
-        {
-            var tileInstance = Instantiate(mapTile, transform);
-            tileInstance.transform.localPosition = positionOverwrite;
-            positionOverwrite -= new Vector3(0, 0, 1);
-        }
 
-        UpdateMap();
+        GameObject[,] newMap = new GameObject[map.GetLength(0) + 1, map.GetLength(1)];
 
-        foreach(GameObject tile in map)
+        for(int i = 0; i < map.GetLength(1); i++)
         {
-            if(tile != null)
+            for(int j = 0; j < map.GetLength(0); j++)
             {
-                if(tile.GetComponent<MapTile>() != null)
+                if (map[j, i] != null)
                 {
-                    tile.GetComponent<MapTile>().UpdateNeighbours();
+                    newMap[j + 1, i] = map[j, i];
                 }
+                
             }
         }
 
+
+        //Vector3 positionOverwrite = new Vector3(2 - mapColumn - 1, 0, 2);
+
+        //Duyệt chiều dọc
+        for (int i = 0; i < newMap.GetLength(1); i++)
+        {
+            var tileInstance = Instantiate(mapTile, transform);
+            if (map[0, i].GetComponent<MapTile>().colorID == 2)
+            {
+                tileInstance.GetComponent<MeshRenderer>().material = floorColor_1;
+            }
+            else
+            {
+                tileInstance.GetComponent<MeshRenderer>().material = floorColor_2;
+            }
+
+            pathForAnim = new Vector3[] { map[0, i].transform.localPosition, map[0, i].transform.localPosition - new Vector3(1, 0, 0) };
+            tileInstance.GetComponent<MeshRenderer>().enabled = false;
+            tileInstance.transform.localPosition = map[0, i].transform.localPosition - new Vector3(1, 0, 0);
+            StartCoroutine(MoveTileAnim(tileInstance, pathForAnim));
+            newMap[0, i] = tileInstance.gameObject;
+            
+            new WaitForSeconds(0.5f);
+            //positionOverwrite -= new Vector3(0, 0, 1);
+        }
+
+        map = newMap;
+
         AdjustSize();
+        AdjustWalls();
+
+        StartCoroutine(DelayedUpdateNeighbour());
+        addColumnUsageLimit--;
+        GamePlayController.Instance.gameScene.InitState();
+    }
+
+    IEnumerator DelayedUpdateNeighbour()
+    {
+        yield return new WaitForSecondsRealtime(2);
+        MapTileNeighbourUpdate();
+    }
+    IEnumerator MoveTileAnim(MapTile tile, Vector3[] destination)
+    {
+        tile.transform.DOLocalPath(destination, 0.5f)
+            .OnWaypointChange(index =>
+        {
+            if(index == destination.Length - 1)
+            {
+                tile.GetComponent<MeshRenderer>().enabled = true;
+            }
+        });
+        yield return null;
     }
 
     //Mainly to allow Player to be able to see as the play field grow bigger
     public void AdjustSize()
     {
-        Vector3 sizeEachColumn = new Vector3(0.15f, 0.15f, 0.15f);
-        transform.localScale = sizeEachColumn * mapColumn;
+        //Vector3 sizeEachColumn = new Vector3(2.4f, 2.4f, 2.4f);
+        //transform.localScale = sizeEachColumn / mapColumn;
+        GamePlayController.Instance.gameScene.cam.orthographicSize += 0.3f * (float)(mapColumn - 4);
     }
 
     public void CheckWinCondition()
@@ -72,13 +123,35 @@ public class LevelControllerNew : SerializedMonoBehaviour
         {
             if (!passenger.isSeated)
             {
-                return;
+                if(timeLimit > 0)
+                {
+                    return;
+                }
+                else
+                {
+                    if (!passengerMoving)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        GamePlayController.Instance.playerContain.lose = true;
+                        GamePlayController.Instance.playerContain.win = false;
+
+                        EndGameBox.Setup().Init();
+                        //Activate lose
+                    }
+                }
             }
         }
 
         if (!passengerMoving)
         {
-            //Activate win pop up screen
+            GamePlayController.Instance.playerContain.lose = false;
+            GamePlayController.Instance.playerContain.win = true;
+
+            EndGameBox.Setup().Init();
+            //Activate win
         }
     }
 
@@ -92,18 +165,21 @@ public class LevelControllerNew : SerializedMonoBehaviour
 
         map = new GameObject[mapColumn + 1, mapRow];
 
+        AdjustWalls();
+    }
+
+    void AdjustWalls()
+    {
         wallRight.transform.localPosition = new Vector3(1.7f, -0.5f, 3.5f - 0.5f * mapRow);
         wallLeft.transform.localPosition = new Vector3(1.3f - mapColumn, -0.5f, 3.5f - 0.5f * mapRow);
         wallFront.transform.localPosition = new Vector3(1.5f - 0.5f * mapColumn, -0.5f, 2.7f);
-        wallBack.transform.localPosition = new Vector3(1.5f - 0.5f * mapColumn, -0.5f, -0.5f * mapRow);
+        wallBack.transform.localPosition = new Vector3(1.5f - 0.5f * mapColumn, -0.5f, 2.5f - (float)mapRow);
 
         wallLeft.GetComponent<BoxCollider>().size = new Vector3(3, 0.2f, 0.5f * mapRow);
         wallRight.GetComponent<BoxCollider>().size = new Vector3(3, 0.2f, 0.5f * mapRow);
         wallFront.GetComponent<BoxCollider>().size = new Vector3(mapColumn, 0.2f, 2f);
         wallBack.GetComponent<BoxCollider>().size = new Vector3(mapColumn, 0.2f, 2f);
     }
-
-    
 
     [Button]
     public void GetPassengers()
@@ -137,6 +213,25 @@ public class LevelControllerNew : SerializedMonoBehaviour
             if (child.GetComponent<WaitTile>() != null)
             {
                 sideway.Add(child.GetComponent<WaitTile>());
+            }
+        }
+
+        Vector3 sidewayPos = new Vector3(3, 0, 2);
+
+        for (int i = 0; i < sideway.Count; i++)
+        {
+            if(i == 0)
+            {
+                sideway[i].transform.localPosition = new Vector3(2, 0, 2);
+            }
+            else if(i == 1)
+            {
+                sideway[i].transform.localPosition = sidewayPos;
+            }
+            else
+            {
+                sidewayPos += new Vector3(0, 0, -1);
+                sideway[i].transform.localPosition = sidewayPos;
             }
         }
     }
@@ -179,10 +274,12 @@ public class LevelControllerNew : SerializedMonoBehaviour
                         if (column % 2 == 0)
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_2;
+                            map[column, row].GetComponent<MapTile>().colorID = 2;
                         }
                         else
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_1;
+                            map[column, row].GetComponent<MapTile>().colorID = 1;
                         }
                     }
                     else
@@ -190,10 +287,12 @@ public class LevelControllerNew : SerializedMonoBehaviour
                         if (column % 2 != 0)
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_2;
+                            map[column, row].GetComponent<MapTile>().colorID = 2;
                         }
                         else
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_1;
+                            map[column, row].GetComponent<MapTile>().colorID = 1;
                         }
                     }
                     
@@ -246,10 +345,12 @@ public class LevelControllerNew : SerializedMonoBehaviour
                         if (column % 2 == 0)
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_2;
+                            map[column, row].GetComponent<MapTile>().colorID = 2;
                         }
                         else
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_1;
+                            map[column, row].GetComponent<MapTile>().colorID = 1;
                         }
                     }
                     else
@@ -257,10 +358,12 @@ public class LevelControllerNew : SerializedMonoBehaviour
                         if (column % 2 != 0)
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_2;
+                            map[column, row].GetComponent<MapTile>().colorID = 2;
                         }
                         else
                         {
                             map[column, row].GetComponent<MeshRenderer>().material = floorColor_1;
+                            map[column, row].GetComponent<MapTile>().colorID = 1;
                         }
                     }
 
@@ -287,11 +390,11 @@ public class LevelControllerNew : SerializedMonoBehaviour
         }
 
         MapTileNeighbourUpdate();
-        AdjustSize();
+        //AdjustSize();
     }
 
     [Button]
-    void MapTileNeighbourUpdate()
+    public void MapTileNeighbourUpdate()
     {
         foreach (Transform child in transform)
         {
