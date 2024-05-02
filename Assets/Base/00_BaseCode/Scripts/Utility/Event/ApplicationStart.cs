@@ -11,7 +11,7 @@ public static class ApplicationStart
     {
         RegisterSceneEvent();
         RegisterServices();
-        Debug.Log("AAAAAAAAAAAAAAAAAA");
+        //Debug.Log("AAAAAAAAAAAAAAAAAA");
     }
 
     private static void RegisterServices()

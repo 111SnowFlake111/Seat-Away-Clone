@@ -51,10 +51,6 @@ public class SettingBox : BaseBox
         btnVibration.onClick.AddListener(delegate { OnClickBtnVibration(); });
         btnMusic.onClick.AddListener(delegate { OnClickBtnMusic(); });
         btnSound.onClick.AddListener(delegate { OnClickBtnSound(); });
-
-
-
-
     }
     private void InitState()
     {
@@ -148,9 +144,9 @@ public class SettingBox : BaseBox
         Close();
     }
 
-    private void OnClickRestorePurchase()
-    {
-        GameController.Instance.iapController.RestorePurchases();
-    }    
+    //private void OnClickRestorePurchase()
+    //{
+    //    GameController.Instance.iapController.RestorePurchases();
+    //}
 
 }

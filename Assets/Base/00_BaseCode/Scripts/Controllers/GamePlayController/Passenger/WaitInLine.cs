@@ -34,22 +34,22 @@ public class WaitInLine : MonoBehaviour
                 {
                     GetComponent<Animator>().SetBool("Walk", true);
 
-                    if (transform.localPosition.x > waitTile.frontTile.transform.localPosition.x)
-                    {
-                        transform.DORotate(new Vector3(0, -90, 0), .1f);
-                    }
-                    else if (transform.localPosition.x < waitTile.frontTile.transform.localPosition.x)
-                    {
-                        transform.DORotate(new Vector3(0, 90, 0), .1f);
-                    }
-                    else if (transform.localPosition.z < waitTile.frontTile.transform.localPosition.z)
-                    {
-                        transform.DORotate(Vector3.zero, .1f);
-                    }
-                    else if (transform.localPosition.z > waitTile.frontTile.transform.localPosition.z)
-                    {
-                        transform.DORotate(new Vector3(0, 180, 0), .1f);
-                    }
+                    //if (transform.localPosition.x > waitTile.frontTile.transform.localPosition.x)
+                    //{
+                    //    transform.DORotate(new Vector3(0, -90, 0), .1f);
+                    //}
+                    //else if (transform.localPosition.x < waitTile.frontTile.transform.localPosition.x)
+                    //{
+                    //    transform.DORotate(new Vector3(0, 90, 0), .1f);
+                    //}
+                    //else if (transform.localPosition.z < waitTile.frontTile.transform.localPosition.z)
+                    //{
+                    //    transform.DORotate(Vector3.zero, .1f);
+                    //}
+                    //else if (transform.localPosition.z > waitTile.frontTile.transform.localPosition.z)
+                    //{
+                    //    transform.DORotate(new Vector3(0, 180, 0), .1f);
+                    //}
                 })
                     .OnComplete(delegate
                 {
@@ -73,22 +73,24 @@ public class WaitInLine : MonoBehaviour
                 {
                     GetComponent<Animator>().SetBool("Walk", true);
 
-                    if (transform.localPosition.x > waitTile.entrance.transform.localPosition.x)
-                    {
-                        transform.DORotate(new Vector3(0, -90, 0), .1f);
-                    }
-                    else if (transform.localPosition.x < waitTile.entrance.transform.localPosition.x)
-                    {
-                        transform.DORotate(new Vector3(0, 90, 0), .1f);
-                    }
-                    else if (transform.localPosition.z < waitTile.entrance.transform.localPosition.z)
-                    {
-                        transform.DORotate(Vector3.zero, .1f);
-                    }
-                    else if (transform.localPosition.z > waitTile.entrance.transform.localPosition.z)
-                    {
-                        transform.DORotate(new Vector3(0, 180, 0), .1f);
-                    }
+                    transform.DORotate(new Vector3(0, -90, 0), .1f);
+
+                    //if (transform.localPosition.x > waitTile.entrance.transform.localPosition.x)
+                    //{
+                    //    transform.DORotate(new Vector3(0, -90, 0), .1f);
+                    //}
+                    //else if (transform.localPosition.x < waitTile.entrance.transform.localPosition.x)
+                    //{
+                    //    transform.DORotate(new Vector3(0, 90, 0), .1f);
+                    //}
+                    //else if (transform.localPosition.z < waitTile.entrance.transform.localPosition.z)
+                    //{
+                    //    transform.DORotate(Vector3.zero, .1f);
+                    //}
+                    //else if (transform.localPosition.z > waitTile.entrance.transform.localPosition.z)
+                    //{
+                    //    transform.DORotate(new Vector3(0, 180, 0), .1f);
+                    //}
                 })
                     .OnComplete(delegate
                 {

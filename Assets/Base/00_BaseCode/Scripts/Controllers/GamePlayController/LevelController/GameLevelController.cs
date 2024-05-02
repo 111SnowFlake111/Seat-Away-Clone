@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class GameLevelController : MonoBehaviour
 {
-    public List<GameObject> levels;
+    public List<GameObject> levels = new List<GameObject>();
 
     public GameObject level;
     void Start()
@@ -16,40 +16,12 @@ public class GameLevelController : MonoBehaviour
             Destroy(level);
         }
 
-        if(UseProfile.CurrentLevel >= levels.Count)
-        {
-            level = Instantiate(levels[UnityEngine.Random.Range(0, levels.Count)], new Vector3 (0, -115f, 0), Quaternion.identity);
-        }
-        else
-        {
-            level = Instantiate(levels[UseProfile.CurrentLevel], new Vector3(0, -115f, 0), Quaternion.identity);
-        }
-
-        GamePlayController.Instance.gameScene.InitState();
-        GamePlayController.Instance.playerContain.inputController.GetCurrentLevel();
-
-        this.RegisterListener(EventID.LEVELCHANGE, UpdateLevel);
-    }
-
-
-    //Event Listener Section
-    void UpdateLevel(object dam)
-    {
-        if (level != null)
-        {
-            Destroy(level);
-        }
-
-        if (UseProfile.CurrentLevel >= levels.Count)
-        {
-            level = Instantiate(levels[UnityEngine.Random.Range(0, levels.Count)], new Vector3(0, -115f, 0), Quaternion.identity);
-        }
-        else
-        {
-            level = Instantiate(levels[UseProfile.CurrentLevel], new Vector3(0, -115f, 0), Quaternion.identity);
-        }
+        level = Instantiate(levels[UseProfile.ChosenLevel], new Vector3(0, -115f, 0), Quaternion.identity);
 
         GamePlayController.Instance.gameScene.InitState();
         GamePlayController.Instance.playerContain.inputController.GetCurrentLevel();
     }
+
+
+    
 }

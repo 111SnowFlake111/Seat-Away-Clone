@@ -86,18 +86,23 @@ public class GameScene : BaseScene
                 {
                     if(hit.collider.GetComponent<MapTile>().chair != null)
                     {
+                        instantMoveTutorial.SetActive(false);
                         chosenChair = hit.collider.GetComponent<MapTile>().chair.GetComponent<Chair>();
                     }
                     else
                     {
+                        instantMoveTutorial.SetActive(false);
+                        btnInstantMove.interactable = true;
                         Debug.LogError("Not a valid chair");
-                        StartCoroutine(WaitForSecondsInstantMove(3));
+                        //StartCoroutine(WaitForSecondsInstantMove(3));
                     }
                 }
                 else
                 {
+                    instantMoveTutorial.SetActive(false);
+                    btnInstantMove.interactable = true;
                     Debug.LogError("Not a valid chair");
-                    StartCoroutine(WaitForSecondsInstantMove(3));
+                    //StartCoroutine(WaitForSecondsInstantMove(3));
                 }
             }
         }
@@ -114,6 +119,7 @@ public class GameScene : BaseScene
                         passenger.goalTileHit = hit;
                         StartCoroutine(passenger.MoveToChair(0));
 
+                        instantMoveTutorial.SetActive(false);
                         StartCoroutine(WaitForSecondsInstantMove(3));
 
                         chosenChair = null;
@@ -122,7 +128,9 @@ public class GameScene : BaseScene
                     else
                     {
                         Debug.LogError("Chair color doesn't match passenger's color");
-                        StartCoroutine(WaitForSecondsInstantMove(3));
+                        instantMoveTutorial.SetActive(false);
+                        btnInstantMove.interactable = true;
+                        //StartCoroutine(WaitForSecondsInstantMove(3));
 
                         chosenChair = null;
                         passenger = null;
@@ -134,6 +142,7 @@ public class GameScene : BaseScene
                     passenger.goalTileHit = hit;
                     StartCoroutine(passenger.MoveToChair(0));
 
+                    instantMoveTutorial.SetActive(false);
                     StartCoroutine(WaitForSecondsInstantMove(3));
 
                     chosenChair = null;
@@ -142,7 +151,9 @@ public class GameScene : BaseScene
                 else
                 {
                     Debug.LogError("Chair color doesn't match passenger's color");
-                    StartCoroutine(WaitForSecondsInstantMove(3));                   
+                    instantMoveTutorial.SetActive(false);
+                    btnInstantMove.interactable = true;
+                    //StartCoroutine(WaitForSecondsInstantMove(3));                   
 
                     chosenChair = null;
                     passenger = null;
@@ -151,7 +162,9 @@ public class GameScene : BaseScene
             else
             {
                 Debug.LogError("This chair is occupied");
-                StartCoroutine(WaitForSecondsInstantMove(3));
+                instantMoveTutorial.SetActive(false);
+                btnInstantMove.interactable = true;
+                //StartCoroutine(WaitForSecondsInstantMove(3));
 
                 chosenChair = null;
                 passenger = null;
@@ -244,7 +257,7 @@ public class GameScene : BaseScene
     {
         yield return new WaitForSeconds(second);
         btnInstantMove.interactable = true;
-        instantMoveTutorial.SetActive(false);
+        //instantMoveTutorial.SetActive(false);
     }
 
     public override void OnEscapeWhenStackBoxEmpty()

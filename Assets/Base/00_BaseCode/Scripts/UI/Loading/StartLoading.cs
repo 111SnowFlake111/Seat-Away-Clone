@@ -6,12 +6,12 @@ using UnityEngine.SceneManagement;
 public class StartLoading : MonoBehaviour
 {
     public Text txtLoading;
-    public Image progressBar;
+    public Slider progressBar;
     private string sceneName;
     private void Start()
     {
         Application.targetFrameRate = 60;
-        progressBar.fillAmount = 0f;
+        progressBar.value = 0f;
         StartCoroutine(ChangeScene());
         StartCoroutine(LoadingText());
     }
@@ -33,13 +33,13 @@ public class StartLoading : MonoBehaviour
         //    sceneName = "HomeScene";
         //}
        // sceneName = "HomeScene";
-        var _asyncOperation = SceneManager.LoadSceneAsync("GamePlay", LoadSceneMode.Single);
+        var _asyncOperation = SceneManager.LoadSceneAsync("HomeScene", LoadSceneMode.Single);
         //_asyncOperation.allowSceneActivation = false;
         //Debug.Log("_asyncOperation " + _asyncOperation.progress);
         //// while the scene loads, we assign its progress to a target that we'll use to fill the progress bar smoothly
         while (!_asyncOperation.isDone)
         {
-            progressBar.fillAmount = Mathf.Clamp01(_asyncOperation.progress / 0.9f);
+            progressBar.value = Mathf.Clamp01(_asyncOperation.progress / 0.9f);
             yield return null;
      
         //// we switch to the new scene

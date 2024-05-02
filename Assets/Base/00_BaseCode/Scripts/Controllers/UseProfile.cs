@@ -32,6 +32,73 @@ public class UseProfile : MonoBehaviour
             EventDispatcher.EventDispatcher.Instance.PostEvent(EventID.LEVELCHANGE);
         }
     }
+
+    public static int ChosenLevel
+    {
+        get
+        {
+            return PlayerPrefs.GetInt(StringHelper.CURRENT_LEVEL_PLAY);
+        }
+        set
+        {
+            PlayerPrefs.SetInt(StringHelper.CURRENT_LEVEL_PLAY, value);
+            PlayerPrefs.Save();
+        }
+    }
+
+    public static int Coin
+    {
+        get
+        {
+            return PlayerPrefs.GetInt(StringHelper.COIN, 0);
+        }
+        set
+        {
+            PlayerPrefs.SetInt(StringHelper.COIN, value);
+            PlayerPrefs.Save();
+            EventDispatcher.EventDispatcher.Instance.PostEvent(EventID.CHANGE_COIN);
+        }
+    }
+
+    public static int TimeFreezeUses
+    {
+        get
+        {
+            return PlayerPrefs.GetInt(StringHelper.TIMEFREEZEUSES, 0);
+        }
+        set
+        {
+            PlayerPrefs.SetInt(StringHelper.TIMEFREEZEUSES, value);
+            PlayerPrefs.Save();
+        }
+    }
+
+    public static int InstantMoveUses
+    {
+        get
+        {
+            return PlayerPrefs.GetInt(StringHelper.INSTANTMOVEUSES, 0);
+        }
+        set
+        {
+            PlayerPrefs.SetInt(StringHelper.INSTANTMOVEUSES, value);
+            PlayerPrefs.Save();
+        }
+    }
+
+    public static int IncreaseSizeUses
+    {
+        get
+        {
+            return PlayerPrefs.GetInt(StringHelper.INCREASESIZEUSES, 0);
+        }
+        set
+        {
+            PlayerPrefs.SetInt(StringHelper.INCREASESIZEUSES, value);
+            PlayerPrefs.Save();
+        }
+    }
+
     public static int EggRanking
     {
         get
@@ -121,19 +188,6 @@ public class UseProfile : MonoBehaviour
     }
     #endregion
 
-    public static int Coin
-    {
-        get
-        {
-            return PlayerPrefs.GetInt(StringHelper.COIN, 0);
-        }
-        set
-        {
-            PlayerPrefs.SetInt(StringHelper.COIN, value);
-            PlayerPrefs.Save();
-            EventDispatcher.EventDispatcher.Instance.PostEvent(EventID.CHANGE_COIN);
-        }
-    }
     public static int Heart
     {
         get
@@ -230,18 +284,7 @@ public class UseProfile : MonoBehaviour
         }
     }
 
-    public int LevelUnlock
-    {
-        get
-        {
-            return PlayerPrefs.GetInt(StringHelper.CURRENT_LEVEL_PLAY, 1);
-        }
-        set
-        {
-            PlayerPrefs.SetInt(StringHelper.CURRENT_LEVEL_PLAY, value);
-            PlayerPrefs.Save();
-        }
-    }
+    
     public bool IsRemoveAds
     {
         get

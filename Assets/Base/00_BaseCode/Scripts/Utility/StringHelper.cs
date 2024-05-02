@@ -48,6 +48,9 @@ public static class StringHelper
     public const string LEVEL_OF_BIRD_CHEST = "level_of_bird_chest";
     public const string SCORE_RANKING = "score_ranking";
     public const string COIN = "coin";
+    public const string TIMEFREEZEUSES = "time_freeze_uses";
+    public const string INSTANTMOVEUSES = "instant_move_uses";
+    public const string INCREASESIZEUSES = "increase_size_uses";
     public const string HEART = "heart";
     public const string SPECIAL_FEATHER = "special_feather";
     public const string REDO_BOOSTER = "redo_booster";

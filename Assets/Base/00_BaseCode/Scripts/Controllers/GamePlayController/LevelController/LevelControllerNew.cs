@@ -8,6 +8,11 @@ using DG.Tweening;
 [System.Serializable]
 public class LevelControllerNew : SerializedMonoBehaviour
 {
+    [Header("----------LEVEL ID (IMPORTANT)-----------")]
+    [Tooltip("Change with caution as this will affect level unlock and level progress")]
+    public int levelId;
+
+    [Space]
     [Header("----------MAP CONFIG-----------")]
     public int moneyReward;
     public int mapRow;
@@ -26,6 +31,8 @@ public class LevelControllerNew : SerializedMonoBehaviour
 
     [Space]
     [Header("-----MISC-----")]
+    public GameObject carModel;
+    public GameObject carDoor;
     public MapTile mapTile;
     public GameObject wallFront;
     public GameObject wallBack;
@@ -88,6 +95,12 @@ public class LevelControllerNew : SerializedMonoBehaviour
 
         StartCoroutine(DelayedUpdateNeighbour());
         addColumnUsageLimit--;
+
+        carModel.transform.DOScale(new Vector3(carModel.transform.localScale.x + 0.5f, carModel.transform.localScale.y, carModel.transform.localScale.z), 0.5f)
+            .OnStart(delegate
+            {
+                carModel.transform.DOLocalMoveX(carModel.transform.localPosition.x - 0.5f, 0.5f);
+            });
         GamePlayController.Instance.gameScene.InitState();
     }
 
@@ -150,7 +163,18 @@ public class LevelControllerNew : SerializedMonoBehaviour
             GamePlayController.Instance.playerContain.lose = false;
             GamePlayController.Instance.playerContain.win = true;
 
-            EndGameBox.Setup().Init();
+            if (levelId >= UseProfile.CurrentLevel)
+            {
+                UseProfile.CurrentLevel++;
+            }
+
+            carDoor.transform.DOLocalRotate(Vector3.zero, 0.75f)
+                .OnComplete(delegate
+                {
+                    EndGameBox.Setup().Init();
+                    transform.DOLocalMoveZ(10f, 2f);
+                });
+
             //Activate win
         }
     }
@@ -162,6 +186,8 @@ public class LevelControllerNew : SerializedMonoBehaviour
         //Note To Self: Every time a row is added (usually to the bottom row), left n right wall must be moved downward by 0.5f z and collider box must be increased by 0.5f in z size
         //Note To Self: Every time a column is added (usually to the left side), front n back wall must be moved to the left by 0.5 x and collider box must be increased by 1f in x size
         //These value is to move the wall
+
+        //Note To Self: For current car model, each use of Increase Car Size boost, the model should increase by 0.5f for x scale and move to the left by 0.5f on x position (mean -0.5f)
 
         map = new GameObject[mapColumn + 1, mapRow];
 

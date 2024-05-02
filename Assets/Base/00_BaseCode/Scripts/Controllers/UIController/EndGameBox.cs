@@ -14,7 +14,7 @@ public class EndGameBox : BaseBox
         if (instance == null)
         {
             instance = Instantiate(Resources.Load<EndGameBox>(PathPrefabs.END_GAME_BOX));
-            instance.Init();
+            //instance.Init();
         }
 
         //instance.InitState();

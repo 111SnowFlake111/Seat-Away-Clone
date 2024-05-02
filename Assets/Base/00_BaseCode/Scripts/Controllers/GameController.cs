@@ -63,9 +63,9 @@ public class GameController : MonoBehaviour
 
         //Application.targetFrameRate = 60;
         //useProfile.CurrentLevelPlay = UseProfile.CurrentLevel;
-        admobAds.Init();
+        //admobAds.Init();
         musicManager.Init();
-        iapController.Init();
+        //iapController.Init();
 
         MMVibrationManager.SetHapticsActive(useProfile.OnVibration);
         // GameController.Instance.admobAds.ShowBanner();

@@ -40,7 +40,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
     {
         Physics.Raycast(transform.position, Vector3.down, out currentFloor, 1f, 1 << LayerMask.NameToLayer("Floor"));
         currentMapTile = currentFloor.collider.GetComponent<MapTile>();
-        Debug.LogError("current floor position recorded");
+        //Debug.LogError("current floor position recorded");
 
         for (int i = 0; i < currentLevel.avaiableChairs.Count; i++)
         {
@@ -48,7 +48,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
             {
                 break;
             }
-            Debug.LogError(GetComponent<Passenger>().colorID);
+            //Debug.LogError(GetComponent<Passenger>().colorID);
 
             if(GetComponent<Passenger>().colorID <= 1)
             {
@@ -385,7 +385,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
         }
         else
         {
-            Debug.LogError("Path not found for " + gameObject.name);
+            //Debug.LogError("Path not found for " + gameObject.name);
             return;
         }
 
