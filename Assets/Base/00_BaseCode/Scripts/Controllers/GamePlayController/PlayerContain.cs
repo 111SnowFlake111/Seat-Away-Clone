@@ -14,6 +14,7 @@ public class PlayerContain : MonoBehaviour
     public void StartGame()
     {
         gameStart = true;
+        GamePlayController.Instance.gameScene.InitState();
         GamePlayController.Instance.gameScene.StartTimer();
     }
 }

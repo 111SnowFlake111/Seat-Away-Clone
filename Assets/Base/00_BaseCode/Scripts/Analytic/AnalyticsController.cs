@@ -7,8 +7,6 @@ using System.Collections.Generic;
 //using Facebook.Unity;
 //using Firebase.Analytics;
 using System;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Events;
 using System.Threading.Tasks;
 using com.adjust.sdk;

@@ -1,4 +1,5 @@
-﻿using MoreMountains.NiceVibrations;
+﻿using EventDispatcher;
+using MoreMountains.NiceVibrations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -60,9 +61,10 @@ public class HomeScene : BaseScene
             item.Init();
         }
         tvCoin.text = "" + UseProfile.Coin;
-        btnSetting.onClick.AddListener(delegate { GameController.Instance.musicManager.PlayClickSound(); OnSettingClick(); });
-        EventDispatcher.EventDispatcher.Instance.RegisterListener(EventID.CHANGE_COIN, OnCoinChange);
+        btnSetting.onClick.AddListener(delegate { GameController.Instance.musicManager.PlayClickSound(); OnSettingClick(); });        
         btnCoin.onClick.AddListener(delegate { HandleClickButton(ButtonType.ShopButton); });
+
+        this.RegisterListener(EventID.CHANGE_COIN, OnCoinChange);
 
     }
     //private void Update()
@@ -143,8 +145,10 @@ public class HomeScene : BaseScene
     }
     private void OnSettingClick()
     {
+        Time.timeScale = 0;
+        GameController.Instance.musicManager.PlayClickSound();
         SettingBox.Setup().Show();
-        MMVibrationManager.Haptic(HapticTypes.MediumImpact);
+        //MMVibrationManager.Haptic(HapticTypes.MediumImpact);
     }
 
     private void OnCoinChange(object param)

@@ -12,6 +12,9 @@ public class InputController : MonoBehaviour
     public GameObject floor;
     public GameObject floor2;
 
+    public AudioClip chairPickup;
+    public AudioClip chairPlacement;
+
     [NonSerialized] Vector3 chairOgPos;
 
     Vector3 ogMousePos;
@@ -68,6 +71,8 @@ public class InputController : MonoBehaviour
                         }
                     }
                 }
+
+                GameController.Instance.musicManager.PlayOneShot(chairPickup);
             }           
         }
 
@@ -245,6 +250,9 @@ public class InputController : MonoBehaviour
                 }
 
                 chair.GetComponent<Rigidbody>().isKinematic = true;
+
+                GameController.Instance.musicManager.PlayOneShot(chairPlacement);
+
                 chair = null;
                 floor = null;
                 floor2 = null;

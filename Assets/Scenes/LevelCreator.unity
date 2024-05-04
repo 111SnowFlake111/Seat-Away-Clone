@@ -1190,6 +1190,85 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5199408164493898333, guid: f1ba2aef49f4af8448bba1eb3dd5176f, type: 3}
   m_PrefabInstance: {fileID: 3271763170260229920}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &534946667
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1806558798595881537}
+    m_Modifications:
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5275673628131607577, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+      propertyPath: m_Name
+      value: Smoke
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+--- !u!198 &534946668 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5472318502133227983, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+  m_PrefabInstance: {fileID: 534946667}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &534946669 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5269354644724778831, guid: 1a800fd6c4e48cb459dfdff0e876a7c0, type: 3}
+  m_PrefabInstance: {fileID: 534946667}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &629629208 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5340870252369107709, guid: f1ba2aef49f4af8448bba1eb3dd5176f, type: 3}
@@ -1948,14 +2027,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 732504000}
-  timer: {fileID: 1254494904}
+  timer: {fileID: 0}
   btnSetting: {fileID: 0}
   instantMoveTutorial: {fileID: 246109372}
   timerFreezeEffect: {fileID: 83734760}
   btnFreezeTimer: {fileID: 1426288344}
   btnInstantMove: {fileID: 106378571}
   btnAddColumn: {fileID: 1755831619}
+  freezeTimerUses: {fileID: 0}
+  instantMoveUses: {fileID: 0}
+  increaseSizeUses: {fileID: 0}
   gameLevelController: {fileID: 1657890611}
+  timeFreeze: {fileID: 0}
+  instantMove: {fileID: 0}
+  sizeIncrease: {fileID: 0}
 --- !u!4 &1395710099
 Transform:
   m_ObjectHideFlags: 0
@@ -2020,6 +2105,8 @@ MonoBehaviour:
   chair: {fileID: 0}
   floor: {fileID: 0}
   floor2: {fileID: 0}
+  chairPickup: {fileID: 0}
+  chairPlacement: {fileID: 0}
 --- !u!4 &1424363012
 Transform:
   m_ObjectHideFlags: 0
@@ -4782,6 +4869,7 @@ Transform:
   - {fileID: 4001738321017675064}
   - {fileID: 8453854582527584376}
   - {fileID: 1619587525}
+  - {fileID: 534946669}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1810907452473087364
@@ -5550,6 +5638,9 @@ MonoBehaviour:
   wallRight: {fileID: 427139284230506783}
   floorColor_1: {fileID: 2100000, guid: 3a206cc67ae094a41a8b1816d44d8988, type: 2}
   floorColor_2: {fileID: 2100000, guid: 0239d644f9640894c967d5af48a3128d, type: 2}
+  victory: {fileID: 8300000, guid: 85c117a849ed8fe4b9acf99edaa16a10, type: 3}
+  defeat: {fileID: 8300000, guid: 9b1363b1d903a3046a7723c4e0ec7230, type: 3}
+  smoke: {fileID: 534946668}
 --- !u!1 &2750534965846350035
 GameObject:
   m_ObjectHideFlags: 0

@@ -132,6 +132,7 @@ MonoBehaviour:
   goal: {fileID: 0}
   currentMapTile: {fileID: 0}
   isAtEntrance: 0
+  sit: {fileID: 8300000, guid: 07164b0e765717d4f800cd536bb0773a, type: 3}
 --- !u!114 &8056756773969957120
 MonoBehaviour:
   m_ObjectHideFlags: 0

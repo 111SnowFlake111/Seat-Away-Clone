@@ -8,6 +8,13 @@ using UnityEngine.UI;
 public class MainSceneController : SceneBase
 {
     public List<Button> levelSelectBtns = new List<Button>();
+    public Sprite levelAvailable;
+    public Sprite levelNotAvailable;
+
+    [Space]
+    [Header("Dev Section")]
+    public Button resetProgress;
+    public Button unlockAllLevels;
 
     //public Button btnHome;
     //public RandomWatchVideo btnReward;
@@ -21,6 +28,9 @@ public class MainSceneController : SceneBase
             levelSelectBtns[number].onClick.AddListener(delegate { PlayLevel(number); });
         }
 
+        resetProgress.onClick.AddListener(delegate { ResetProgress(); });
+        unlockAllLevels.onClick.AddListener(delegate { UnlockAllLevels(); });
+
         InitState();
         
         this.RegisterListener(EventID.LEVELCHANGE, UpdateUnlockedLevel);
@@ -33,6 +43,7 @@ public class MainSceneController : SceneBase
             if (i < levelSelectBtns.Count)
             {
                 levelSelectBtns[i].interactable = true;
+                levelSelectBtns[i].GetComponent<Image>().sprite = levelAvailable;
             }
         }
 
@@ -41,6 +52,7 @@ public class MainSceneController : SceneBase
             if (i < levelSelectBtns.Count)
             {
                 levelSelectBtns[i].interactable = false;
+                levelSelectBtns[i].GetComponent<Image>().sprite = levelNotAvailable;
             }
         }
     }
@@ -48,7 +60,21 @@ public class MainSceneController : SceneBase
     private void PlayLevel(int id)
     {     
         UseProfile.ChosenLevel = id;
+        GameController.Instance.musicManager.PlayClickSound();
         SceneManager.LoadScene("GamePlay");
+    }
+
+    //Dev Section
+    void ResetProgress()
+    {
+        GameController.Instance.musicManager.PlayClickSound();
+        UseProfile.CurrentLevel = 0;
+    }
+
+    void UnlockAllLevels()
+    {
+        GameController.Instance.musicManager.PlayClickSound();
+        UseProfile.CurrentLevel = levelSelectBtns.Count - 1;
     }
 
     //Event Listener Section

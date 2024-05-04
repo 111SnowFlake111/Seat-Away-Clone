@@ -23,6 +23,9 @@ public class PathFindingAStar : SerializedMonoBehaviour
     public MapTile currentMapTile;
 
     public bool isAtEntrance = false;
+
+    public AudioClip sit;
+
     RaycastHit currentFloor;
     [NonSerialized] public RaycastHit goalTileHit;
 
@@ -526,7 +529,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
         switch (moveID)
         {
             case 0:
-                transform.DOLocalMove(goalTileHit.collider.GetComponent<MapTile>().transform.localPosition + new Vector3(0, 0.5f, 0), 1f).OnUpdate(delegate
+                transform.DOLocalMove(goalTileHit.collider.GetComponent<MapTile>().transform.localPosition + new Vector3(0, 0.5f, 0), 0.75f).OnUpdate(delegate
                 {
                     currentLevel.passengerMoving = true;
                 }).SetEase(Ease.Linear)
@@ -588,7 +591,11 @@ public class PathFindingAStar : SerializedMonoBehaviour
                     })
                     .OnComplete(delegate
                     {
+                        GameController.Instance.musicManager.PlayOneShot(sit);
+
                         transform.DORotate(Vector3.zero, .1f);
+                        transform.DOLocalJump(Vector3.zero, 5, 1, 0.5f);
+
                         GetComponent<Animator>().SetBool("Sit", true);
 
                         if (goal.transform.parent.GetComponent<TwinChair>() != null)
@@ -617,7 +624,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
                     path.Add(tile.transform.localPosition);
                 }
 
-                transform.DOLocalPath(path.ToArray(), 1f).SetEase(Ease.Linear).OnUpdate(delegate { currentLevel.passengerMoving = true; })
+                transform.DOLocalPath(path.ToArray(), 0.5f * (path.Count - 1)).SetEase(Ease.Linear).OnUpdate(delegate { currentLevel.passengerMoving = true; })
                     .OnWaypointChange(index =>
                     {
                         if (index + 1 != -1)
@@ -680,7 +687,17 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         }
                     }).OnComplete(delegate
                     {
+                        GameController.Instance.musicManager.PlayOneShot(sit);
+
                         transform.DORotate(Vector3.zero, .1f);
+                        transform.DOLocalJump(Vector3.zero, 5, 1, 0.5f)
+                        .OnComplete(delegate
+                        {
+                            if (!currentLevel.passengerMoving)
+                            {
+                                currentLevel.CheckWinCondition();
+                            }
+                        });
 
                         GetComponent<Animator>().SetBool("Sit", true);
 
@@ -696,8 +713,6 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         gameObject.transform.localPosition = new Vector3(0, 0, 0);
 
                         currentLevel.passengerMoving = false;
-
-                        currentLevel.CheckWinCondition();
 
                         gameObject.GetComponent<WaitInLine>().enabled = false;
                         gameObject.GetComponent<PathFindingAStar>().enabled = false;

@@ -29,7 +29,7 @@ public class WaitInLine : MonoBehaviour
             {
                 waitTile.frontTile.occupied = true;
                 waitTile.occupied = false;
-                transform.DOLocalMove(waitTile.frontTile.transform.localPosition + new Vector3(0, 0.5f, 0), 1f).SetEase(Ease.Linear)
+                transform.DOLocalMove(waitTile.frontTile.transform.localPosition + new Vector3(0, 0.5f, 0), 0.75f).SetEase(Ease.Linear)
                     .OnStart(delegate
                 {
                     GetComponent<Animator>().SetBool("Walk", true);
@@ -68,7 +68,7 @@ public class WaitInLine : MonoBehaviour
             {
                 waitTile.entrance.occupied = true;
                 waitTile.occupied = false;
-                transform.DOLocalMove(waitTile.entrance.transform.localPosition + new Vector3(0, 0.5f, 0), 1f).SetEase(Ease.Linear)
+                transform.DOLocalMove(waitTile.entrance.transform.localPosition + new Vector3(0, 0.5f, 0), 0.75f).SetEase(Ease.Linear)
                     .OnStart(delegate
                 {
                     GetComponent<Animator>().SetBool("Walk", true);

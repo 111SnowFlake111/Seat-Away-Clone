@@ -7,9 +7,10 @@ using UnityEngine.UI;
 
 public class GameScene : BaseScene
 {
+    #region PublicVar
     public Camera cam;
 
-    public TMP_Text timer;
+    public Text timer;
 
     public Button btnSetting;
 
@@ -20,15 +21,27 @@ public class GameScene : BaseScene
     public Button btnInstantMove;
     public Button btnAddColumn;
 
+    public Text freezeTimerUses;
+    public Text instantMoveUses;
+    public Text increaseSizeUses;
+
     public GameLevelController gameLevelController;
 
-    [NonSerialized] public bool firstChairMoved = false;
+    public AudioClip timeFreeze;
+    public AudioClip instantMove;
+    public AudioClip sizeIncrease;
 
+    [NonSerialized] public bool firstChairMoved = false;
+    #endregion
+
+    #region PrivateVar
     bool instantMoveActivated = false;
     RaycastHit hit;
     Coroutine temp;
     Chair chosenChair = null;
     PathFindingAStar passenger = null;
+    #endregion
+
     public void Init()
     {
         timerFreezeEffect.fillAmount = 0;
@@ -37,6 +50,8 @@ public class GameScene : BaseScene
         btnFreezeTimer.onClick.AddListener(delegate { FreezeTimer(); });
         btnInstantMove.onClick.AddListener(delegate { InstantMove(); });
         btnAddColumn.onClick.AddListener(delegate { AddColumn(); });
+
+        btnSetting.onClick.AddListener(delegate { OpenSetting(); });
     }
 
     public void InitState()
@@ -46,6 +61,48 @@ public class GameScene : BaseScene
 
         timer.text = string.Format("{0: 00}: {1: 00}", minute, second);
 
+        //Booster Uses
+        if (UseProfile.TimeFreezeUses <= 0)
+        {
+            freezeTimerUses.color = Color.red;
+        }
+        else
+        {
+            freezeTimerUses.color = Color.green;
+        }
+
+        if (UseProfile.InstantMoveUses <= 0)
+        {
+            instantMoveUses.color = Color.red;
+        }
+        else
+        {
+            instantMoveUses.color = Color.green;
+        }
+
+        if (UseProfile.IncreaseSizeUses <= 0)
+        {
+            increaseSizeUses.color = Color.red;
+        }
+        else
+        {
+            increaseSizeUses.color = Color.green;
+        }
+        freezeTimerUses.text = UseProfile.TimeFreezeUses.ToString();
+        instantMoveUses.text = UseProfile.InstantMoveUses.ToString();
+        increaseSizeUses.text = UseProfile.IncreaseSizeUses.ToString();
+
+        //Time Freeze Booster only clickable after the game has begun
+        if (GamePlayController.Instance.playerContain.gameStart)
+        {
+            btnFreezeTimer.interactable = true;
+        }
+        else
+        {
+            btnFreezeTimer.interactable = false;
+        }
+
+        //IncreaseSize Booster Usage Limiter
         if (gameLevelController.level.GetComponent<LevelControllerNew>().addColumnUsageLimit > 0)
         {
             btnAddColumn.interactable = true;
@@ -94,6 +151,8 @@ public class GameScene : BaseScene
                         instantMoveTutorial.SetActive(false);
                         btnInstantMove.interactable = true;
                         Debug.LogError("Not a valid chair");
+                        instantMoveActivated = false;
+                        GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(true);
                         //StartCoroutine(WaitForSecondsInstantMove(3));
                     }
                 }
@@ -102,6 +161,8 @@ public class GameScene : BaseScene
                     instantMoveTutorial.SetActive(false);
                     btnInstantMove.interactable = true;
                     Debug.LogError("Not a valid chair");
+                    instantMoveActivated = false;
+                    GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(true);
                     //StartCoroutine(WaitForSecondsInstantMove(3));
                 }
             }
@@ -124,6 +185,9 @@ public class GameScene : BaseScene
 
                         chosenChair = null;
                         passenger = null;
+
+                        UseProfile.InstantMoveUses--;
+                        InitState();
                     }
                     else
                     {
@@ -147,6 +211,9 @@ public class GameScene : BaseScene
 
                     chosenChair = null;
                     passenger = null;
+
+                    UseProfile.InstantMoveUses--;
+                    InitState();
                 }
                 else
                 {
@@ -170,6 +237,7 @@ public class GameScene : BaseScene
                 passenger = null;
             }
 
+            instantMoveActivated = false;
             GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(true);
         }
     }
@@ -184,71 +252,112 @@ public class GameScene : BaseScene
         StopCoroutine(temp);
     }
 
-    #region ButtonFunctions
+    public void OpenSetting()
+    {
+        GameController.Instance.musicManager.PlayClickSound();
+        Time.timeScale = 0;
+        SettingBox.Setup().Show();
+    }
+
+    #region BoostersFunctions
     void FreezeTimer()
     {
-        timerFreezeEffect.fillAmount = 1;
-        timerFreezeEffect.DOFillAmount(0, 7f).SetEase(Ease.Linear)
-            .OnStart(delegate
-            {
-                btnFreezeTimer.interactable = false;
-                StopTimer();
+        if (UseProfile.TimeFreezeUses <= 0)
+        {
+            GameController.Instance.musicManager.PlayClickSound();
+            Time.timeScale = 0;
+            InGameShop.Setup().Show();
+        }
+        else
+        {
+            GameController.Instance.musicManager.PlayOneShot(timeFreeze);
 
-            })
-            .OnComplete(delegate
-            {
-                btnFreezeTimer.interactable = true;
-                StartTimer();
-            });
+            UseProfile.TimeFreezeUses--;
+            InitState();
+
+            timerFreezeEffect.fillAmount = 1;
+            timerFreezeEffect.DOFillAmount(0, 7f).SetEase(Ease.Linear)
+                .OnStart(delegate
+                {
+                    btnFreezeTimer.interactable = false;
+                    StopTimer();
+
+                })
+                .OnComplete(delegate
+                {
+                    btnFreezeTimer.interactable = true;
+                    StartTimer();
+                });
+        }
     }
 
     void InstantMove()
     {
-        if (gameLevelController.level.GetComponent<LevelControllerNew>().passengerMoving)
+        if (UseProfile.InstantMoveUses <= 0)
         {
-            GameController.Instance.moneyEffectController.SpawnEffectText_FlyUp
-                (
-                    btnInstantMove.transform.position + new Vector3(0, 30, 0),
-                    "Please wait till all passengers have stopped moving",
-                    Color.red
-                );
-            return;
+            GameController.Instance.musicManager.PlayClickSound();
+            Time.timeScale = 0;
+            InGameShop.Setup().Show();
         }
-
-        btnInstantMove.interactable = false;
-
-        
-        
-
-        for (int i = 0; i < gameLevelController.level.GetComponent<LevelControllerNew>().passengers.Count; i++)
+        else
         {
-            if (gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i] != null)
+            GameController.Instance.musicManager.PlayOneShot(instantMove);
+
+            if (gameLevelController.level.GetComponent<LevelControllerNew>().passengerMoving)
             {
-                if (gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i].GetComponent<PathFindingAStar>().isAtEntrance && !gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i].GetComponent<PathFindingAStar>().isSeated)
+                GameController.Instance.moneyEffectController.SpawnEffectText_FlyUp
+                    (
+                        btnInstantMove.transform.position + new Vector3(0, 30, 0),
+                        "Please wait till all passengers have stopped moving",
+                        Color.red
+                    );
+                return;
+            }
+
+            btnInstantMove.interactable = false;
+
+            for (int i = 0; i < gameLevelController.level.GetComponent<LevelControllerNew>().passengers.Count; i++)
+            {
+                if (gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i] != null)
                 {
-                    passenger = gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i].GetComponent<PathFindingAStar>();
-                    break;
+                    if (gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i].GetComponent<PathFindingAStar>().isAtEntrance && !gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i].GetComponent<PathFindingAStar>().isSeated)
+                    {
+                        passenger = gameLevelController.level.GetComponent<LevelControllerNew>().passengers[i].GetComponent<PathFindingAStar>();
+                        break;
+                    }
                 }
             }
+
+            if (passenger == null)
+            {
+                Debug.LogError("No valid Passenger at the entrance");
+                StartCoroutine(WaitForSecondsInstantMove(3));
+
+                return;
+            }
+
+            instantMoveTutorial.SetActive(true);
+            instantMoveActivated = true;
+
+            GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(false);
         }
-
-        if (passenger == null)
-        {
-            Debug.LogError("No valid Passenger at the entrance");
-            StartCoroutine(WaitForSecondsInstantMove(3));
-
-            return;
-        }
-
-        instantMoveTutorial.SetActive(true);
-        instantMoveActivated = true;
-
-        GamePlayController.Instance.playerContain.inputController.gameObject.SetActive(false);
     }
 
     void AddColumn()
-    {        
-        gameLevelController.level.GetComponent<LevelControllerNew>().AddOneColumnToTheLeft();
+    {
+        if (UseProfile.IncreaseSizeUses <= 0)
+        {
+            GameController.Instance.musicManager.PlayClickSound();
+            Time.timeScale = 0;
+            InGameShop.Setup().Show();
+        }
+        else
+        {
+            GameController.Instance.musicManager.PlayOneShot(sizeIncrease);
+            UseProfile.IncreaseSizeUses--;
+            InitState();
+            gameLevelController.level.GetComponent<LevelControllerNew>().AddOneColumnToTheLeft();
+        }       
     }
     #endregion
 

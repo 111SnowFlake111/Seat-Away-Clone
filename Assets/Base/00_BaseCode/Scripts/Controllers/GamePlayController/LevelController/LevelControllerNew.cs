@@ -41,6 +41,15 @@ public class LevelControllerNew : SerializedMonoBehaviour
     public Material floorColor_1;
     public Material floorColor_2;
 
+    [Space]
+    [Header("-----AUDIO-----")]
+    public AudioClip victory;
+    public AudioClip defeat;
+
+    [Space]
+    [Header("------EFFECT-----")]
+    public ParticleSystem smoke;
+
     [NonSerialized] public int addColumnUsageLimit = 1;
 
     public void AddOneColumnToTheLeft()
@@ -151,7 +160,8 @@ public class LevelControllerNew : SerializedMonoBehaviour
                         GamePlayController.Instance.playerContain.lose = true;
                         GamePlayController.Instance.playerContain.win = false;
 
-                        EndGameBox.Setup().Init();
+                        GameController.Instance.musicManager.PlayOneShot(defeat);
+                        EndGameBox.Setup().Show();
                         //Activate lose
                     }
                 }
@@ -171,12 +181,25 @@ public class LevelControllerNew : SerializedMonoBehaviour
             carDoor.transform.DOLocalRotate(Vector3.zero, 0.75f)
                 .OnComplete(delegate
                 {
-                    EndGameBox.Setup().Init();
-                    transform.DOLocalMoveZ(10f, 2f);
+                    
+                    transform.DOLocalMoveZ(10f, 2f)
+                    .OnStart(delegate
+                    {
+                        smoke.Play();
+                        StartCoroutine(DelayedWin());
+                    });
                 });
 
+            
             //Activate win
         }
+    }
+
+    IEnumerator DelayedWin()
+    {
+        yield return new WaitForSeconds(0.75f);
+        GameController.Instance.musicManager.PlayOneShot(victory);
+        EndGameBox.Setup().Show();
     }
 
     public void SetMap()

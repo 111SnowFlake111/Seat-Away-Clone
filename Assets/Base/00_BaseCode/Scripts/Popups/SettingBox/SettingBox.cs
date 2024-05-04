@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityEngine.SceneManagement;
 public class SettingBox : BaseBox
 {
     #region instance
@@ -42,7 +43,7 @@ public class SettingBox : BaseBox
     [SerializeField] private Sprite spriteVMusicOff;
     [SerializeField] private Sprite spriteVSoundOff;
 
-
+    public Button toMenuBtn;
  
     #endregion
     private void Init()
@@ -51,10 +52,20 @@ public class SettingBox : BaseBox
         btnVibration.onClick.AddListener(delegate { OnClickBtnVibration(); });
         btnMusic.onClick.AddListener(delegate { OnClickBtnMusic(); });
         btnSound.onClick.AddListener(delegate { OnClickBtnSound(); });
+
+        toMenuBtn.onClick.AddListener(delegate { ToMenu(); });
     }
     private void InitState()
     {
         SetUpBtn();
+        if (SceneManager.GetActiveScene().name == "GamePlay")
+        {
+            toMenuBtn.gameObject.SetActive(true);
+        }
+        else
+        {
+            toMenuBtn.gameObject.SetActive(false);
+        }
     }
     private void SetUpBtn()
     {
@@ -137,10 +148,17 @@ public class SettingBox : BaseBox
         SetUpBtn();
     }
 
+    private void ToMenu()
+    {
+        GameController.Instance.musicManager.PlayClickSound();
+        Time.timeScale = 1;
+        SceneManager.LoadScene("HomeScene");
+    }
 
     private void OnClickButtonClose()
     {
         GameController.Instance.musicManager.PlayClickSound();
+        Time.timeScale = 1;
         Close();
     }
 
