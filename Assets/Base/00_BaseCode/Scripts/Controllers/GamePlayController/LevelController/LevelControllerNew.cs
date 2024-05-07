@@ -4,6 +4,9 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using System;
 using DG.Tweening;
+using UnityEngine.UI;
+using Sirenix.Utilities;
+using System.Linq;
 
 [System.Serializable]
 public class LevelControllerNew : SerializedMonoBehaviour
@@ -11,6 +14,11 @@ public class LevelControllerNew : SerializedMonoBehaviour
     [Header("----------LEVEL ID (IMPORTANT)-----------")]
     [Tooltip("Change with caution as this will affect level unlock and level progress")]
     public int levelId;
+
+    [Space]
+    [Header("-----------CAMERA CONTROL-----------")]
+    [Tooltip("This is for camera zoom value, which will be loaded upon entering a level")]
+    public float mainCameraZoomValue;
 
     [Space]
     [Header("----------MAP CONFIG-----------")]
@@ -25,12 +33,13 @@ public class LevelControllerNew : SerializedMonoBehaviour
     public List<WaitTile> sideway;
 
     [Space]
-    [Header("-----TIME LIMIT(s)-----")]
+    [Header("-----------TIME LIMIT(seconds)-----------")]
+    [Tooltip("Time limit of a level, the value here indicate seconds")]
     public int timeLimit;
-    [NonSerialized] public bool passengerMoving;
+    //[NonSerialized] public bool passengerMoving;
 
     [Space]
-    [Header("-----MISC-----")]
+    [Header("-----------MISC-----------")]
     public GameObject carModel;
     public GameObject carDoor;
     public MapTile mapTile;
@@ -42,15 +51,34 @@ public class LevelControllerNew : SerializedMonoBehaviour
     public Material floorColor_2;
 
     [Space]
-    [Header("-----AUDIO-----")]
+    [Header("-----------AUDIO-----------")]
     public AudioClip victory;
     public AudioClip defeat;
 
     [Space]
-    [Header("------EFFECT-----")]
+    [Header("-----------EFFECT-----------")]
     public ParticleSystem smoke;
 
     [NonSerialized] public int addColumnUsageLimit = 1;
+    public List<PathFindingAStar> movingPassngers = new List<PathFindingAStar>();
+
+    private void Start()
+    {
+        GamePlayController.Instance.gameScene.cam.orthographicSize = mainCameraZoomValue;
+        GamePlayController.Instance.gameScene.background.transform.localPosition = new Vector3(-215f - 20f * CalculateMultipler(), 0, 2500f);
+
+        int CalculateMultipler()
+        {
+            if (mapColumn > 3)
+            {
+                return mapColumn - 3;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
 
     public void AddOneColumnToTheLeft()
     {
@@ -110,6 +138,7 @@ public class LevelControllerNew : SerializedMonoBehaviour
             {
                 carModel.transform.DOLocalMoveX(carModel.transform.localPosition.x - 0.5f, 0.5f);
             });
+        GamePlayController.Instance.gameScene.background.transform.DOLocalMoveX(GamePlayController.Instance.gameScene.background.transform.localPosition.x - 20f, 0.5f);
         GamePlayController.Instance.gameScene.InitState();
     }
 
@@ -136,63 +165,78 @@ public class LevelControllerNew : SerializedMonoBehaviour
     {
         //Vector3 sizeEachColumn = new Vector3(2.4f, 2.4f, 2.4f);
         //transform.localScale = sizeEachColumn / mapColumn;
-        GamePlayController.Instance.gameScene.cam.orthographicSize += 0.3f * (float)(mapColumn - 4);
+
+        //Note to self: Each column increased will require car model to increase x scale by ... and move local x position to the left by ...
+        //Note to self: Each row increased will require car model to increase z scale by 0.25f and move local z position downward by 0.3f, 6 rows = 0.9f
+
+        //if (mapColumn > 4 || mapRow > 8)
+        //{
+        //    GamePlayController.Instance.gameScene.cam.DOOrthoSize(5 + 0.5f * GetBiggestValueOfColumnAndRow(), 0.5f);
+        //}
+
+        //int GetBiggestValueOfColumnAndRow()
+        //{
+        //    if ((mapColumn - 4) > (mapRow - 8))
+        //    {
+        //        return mapColumn - 4;
+        //    }
+        //    else
+        //    {
+        //        return mapRow - 8;
+        //    }
+        //}
+
+        GamePlayController.Instance.gameScene.cam.DOOrthoSize(mainCameraZoomValue + 0.5f, 0.5f);
     }
 
     public void CheckWinCondition()
     {
-        foreach(PathFindingAStar passenger in passengers)
+        if (!movingPassngers.Any())
         {
-            if (!passenger.isSeated)
+            if(passengers.Any())
             {
-                if(timeLimit > 0)
+                if (timeLimit > 0)
                 {
                     return;
                 }
                 else
                 {
-                    if (!passengerMoving)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        GamePlayController.Instance.playerContain.lose = true;
-                        GamePlayController.Instance.playerContain.win = false;
+                    GamePlayController.Instance.playerContain.lose = true;
+                    GamePlayController.Instance.playerContain.win = false;
 
-                        GameController.Instance.musicManager.PlayOneShot(defeat);
-                        EndGameBox.Setup().Show();
-                        //Activate lose
-                    }
+                    GameController.Instance.musicManager.PlayOneShot(defeat);
+                    EndGameBox.Setup().Show();
+                    return;
+                    //Activate lose
                 }
             }
-        }
-
-        if (!passengerMoving)
-        {
-            GamePlayController.Instance.playerContain.lose = false;
-            GamePlayController.Instance.playerContain.win = true;
-
-            if (levelId >= UseProfile.CurrentLevel)
+            else
             {
-                UseProfile.CurrentLevel++;
-            }
+                GamePlayController.Instance.playerContain.lose = false;
+                GamePlayController.Instance.playerContain.win = true;
 
-            carDoor.transform.DOLocalRotate(Vector3.zero, 0.75f)
-                .OnComplete(delegate
+                if (levelId >= UseProfile.CurrentLevel)
                 {
-                    
-                    transform.DOLocalMoveZ(10f, 2f)
-                    .OnStart(delegate
-                    {
-                        smoke.Play();
-                        StartCoroutine(DelayedWin());
-                    });
-                });
+                    UseProfile.CurrentLevel++;
+                }
 
-            
-            //Activate win
+                carDoor.transform.DOLocalRotate(Vector3.zero, 0.75f)
+                    .OnComplete(delegate
+                    {
+
+                        transform.DOLocalMoveZ(20f, 4f)
+                        .OnStart(delegate
+                        {
+                            smoke.Play();
+                            StartCoroutine(DelayedWin());
+                        });
+                    });
+
+                //Activate win
+            }
         }
+
+        
     }
 
     IEnumerator DelayedWin()
@@ -438,6 +482,34 @@ public class LevelControllerNew : SerializedMonoBehaviour
             }
         }
 
+        carModel.transform.localPosition = new Vector3(0 - 0.5f * ColumnMultipler(), 0, 0.9f - 0.3f * RowMultipler());
+        carModel.transform.localScale = new Vector3(2f + 0.5f * ColumnMultipler(), 2 , 1.75f + 0.25f * RowMultipler());
+
+        int ColumnMultipler()
+        {
+            if (mapColumn > 3)
+            {
+                return mapColumn - 3;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        int RowMultipler()
+        {
+            if (mapRow > 6)
+            {
+                return mapRow - 6;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        smoke.gameObject.transform.localPosition = new Vector3(1.75f - 0.25f * mapColumn, -1, 2.5f - 1 * mapRow);
         MapTileNeighbourUpdate();
         //AdjustSize();
     }

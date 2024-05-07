@@ -1707,7 +1707,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
   levelId: 3
-  moneyReward: 50
+  mainCameraZoomValue: 5
+  moneyReward: 25
   mapRow: 6
   mapColumn: 3
   avaiableColors:
@@ -5323,7 +5324,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae826c3eea3e0644ab6c7c0077280ba1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.95
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae826c3eea3e0644ab6c7c0077280ba1, type: 3}
       propertyPath: m_LocalRotation.w

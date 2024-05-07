@@ -529,12 +529,11 @@ public class PathFindingAStar : SerializedMonoBehaviour
         switch (moveID)
         {
             case 0:
-                transform.DOLocalMove(goalTileHit.collider.GetComponent<MapTile>().transform.localPosition + new Vector3(0, 0.5f, 0), 0.75f).OnUpdate(delegate
-                {
-                    currentLevel.passengerMoving = true;
-                }).SetEase(Ease.Linear)
+                transform.DOLocalMove(goalTileHit.collider.GetComponent<MapTile>().transform.localPosition + new Vector3(0, 0.5f, 0), 0.5f).SetEase(Ease.Linear)
                     .OnStart(delegate
                     {
+                        currentLevel.movingPassngers.Add(this);
+
                         GetComponent<Animator>().SetBool("Walk", true);
 
                         if (transform.localPosition.x > goalTileHit.collider.GetComponent<MapTile>().transform.localPosition.x)
@@ -591,10 +590,24 @@ public class PathFindingAStar : SerializedMonoBehaviour
                     })
                     .OnComplete(delegate
                     {
+                        
+
                         GameController.Instance.musicManager.PlayOneShot(sit);
 
                         transform.DORotate(Vector3.zero, .1f);
-                        transform.DOLocalJump(Vector3.zero, 5, 1, 0.5f);
+                        transform.DOLocalJump(Vector3.zero, 5, 1, 0.5f)
+                        .OnComplete(delegate
+                        {
+                            currentLevel.movingPassngers.Remove(this);
+
+                            currentLevel.movingPassngers.Remove(this);
+
+                            if (!currentLevel.movingPassngers.Any())
+                            {
+                                currentLevel.CheckWinCondition();
+                            }
+
+                        });
 
                         GetComponent<Animator>().SetBool("Sit", true);
 
@@ -609,10 +622,6 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         gameObject.transform.parent = goal.transform;
                         gameObject.transform.localPosition = new Vector3(0, 0, 0);
 
-                        currentLevel.passengerMoving = false;
-
-                        currentLevel.CheckWinCondition();
-
                         gameObject.GetComponent<WaitInLine>().enabled = false;
                         gameObject.GetComponent<PathFindingAStar>().enabled = false;
                     }).WaitForCompletion();
@@ -624,7 +633,7 @@ public class PathFindingAStar : SerializedMonoBehaviour
                     path.Add(tile.transform.localPosition);
                 }
 
-                transform.DOLocalPath(path.ToArray(), 0.5f * (path.Count - 1)).SetEase(Ease.Linear).OnUpdate(delegate { currentLevel.passengerMoving = true; })
+                transform.DOLocalPath(path.ToArray(), 0.15f * (path.Count - 1)).SetEase(Ease.Linear)
                     .OnWaypointChange(index =>
                     {
                         if (index + 1 != -1)
@@ -650,6 +659,8 @@ public class PathFindingAStar : SerializedMonoBehaviour
                     })
                     .OnStart(delegate
                     {
+                        currentLevel.movingPassngers.Add(this);
+
                         currentLevel.avaiableChairs.Remove(goal);
                         currentLevel.passengers.Remove(gameObject.GetComponent<PathFindingAStar>());
                         gameObject.GetComponent<WaitInLine>().waitTile.occupied = false;
@@ -687,13 +698,17 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         }
                     }).OnComplete(delegate
                     {
+                        
+
                         GameController.Instance.musicManager.PlayOneShot(sit);
 
                         transform.DORotate(Vector3.zero, .1f);
                         transform.DOLocalJump(Vector3.zero, 5, 1, 0.5f)
                         .OnComplete(delegate
                         {
-                            if (!currentLevel.passengerMoving)
+                            currentLevel.movingPassngers.Remove(this);
+
+                            if (!currentLevel.movingPassngers.Any())
                             {
                                 currentLevel.CheckWinCondition();
                             }
@@ -711,8 +726,6 @@ public class PathFindingAStar : SerializedMonoBehaviour
                         }
                         gameObject.transform.parent = goal.transform;
                         gameObject.transform.localPosition = new Vector3(0, 0, 0);
-
-                        currentLevel.passengerMoving = false;
 
                         gameObject.GetComponent<WaitInLine>().enabled = false;
                         gameObject.GetComponent<PathFindingAStar>().enabled = false;

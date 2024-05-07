@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System;
 using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,8 @@ using UnityEngine.UI;
 public class GameScene : BaseScene
 {
     #region PublicVar
+    public GameObject background;
+
     public Camera cam;
 
     public Text timer;
@@ -303,7 +306,7 @@ public class GameScene : BaseScene
         {
             GameController.Instance.musicManager.PlayOneShot(instantMove);
 
-            if (gameLevelController.level.GetComponent<LevelControllerNew>().passengerMoving)
+            if (gameLevelController.level.GetComponent<LevelControllerNew>().movingPassngers.Any())
             {
                 GameController.Instance.moneyEffectController.SpawnEffectText_FlyUp
                     (

@@ -1459,6 +1459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bec22d7b5195df42bc9cd66f7e6a267, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  background: {fileID: 1884132335}
   cam: {fileID: 732504000}
   timer: {fileID: 1254494907}
   btnSetting: {fileID: 253325307}
@@ -1812,6 +1813,16 @@ MonoBehaviour:
   - {fileID: 590866808569313557, guid: dc24604b3cb9a5c4a88a31e74bf6bb88, type: 3}
   - {fileID: 6381923381439939514, guid: b2b908c7377235c41a7030c0b5cc094c, type: 3}
   - {fileID: 8008543215931094374, guid: 006ee3db8fafcdc46b3888da24b0e537, type: 3}
+  - {fileID: 645509357115710874, guid: b45a7ed46bf9e5b48a6433496c50806c, type: 3}
+  - {fileID: 1583521003947934885, guid: 595981a6f95fde3408e84271658610f8, type: 3}
+  - {fileID: 6552232934120308398, guid: 465cc43d70d9317409f92b28aadb7488, type: 3}
+  - {fileID: 4301457909421248668, guid: d2a58720db697ae488509b2e7515dd75, type: 3}
+  - {fileID: 3691736133206002913, guid: 2895a7e919e048e4591aebc6f444309f, type: 3}
+  - {fileID: 499869490231502850, guid: 85d5eb9aabc8acf4fbf08a01a596048a, type: 3}
+  - {fileID: 2840793292979844819, guid: b57383604d9f5a445a01852326dadab0, type: 3}
+  - {fileID: 4381307555080554192, guid: 6d51e274d9b0c484d8bb383d5f656a86, type: 3}
+  - {fileID: 8319585256665606549, guid: 131542fd4975def498b96e2f3b18b799, type: 3}
+  - {fileID: 5957244234294412752, guid: 47cc4ba92a08a26418c0b461052bf884, type: 3}
   level: {fileID: 0}
 --- !u!1 &1740314271
 GameObject:
